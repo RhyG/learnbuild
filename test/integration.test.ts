@@ -329,7 +329,7 @@ describe('skill templates match the real CLI', () => {
     const json = /```json\n([\s\S]*?)```/.exec(skill)![1]!;
     const plan = parsePlan(JSON.parse(json));
     const { state } = applyPlan(createProject({ projectId: 'example' }), plan, AT);
-    assert.deepEqual(Object.keys(state.tasks), ['setup', 'create-game']);
+    assert.deepEqual(Object.keys(state.tasks), ['setup', 'create-game', 'add-tests']);
     assert.equal(state.checkpoints['storage-gate']?.blocking, true);
   });
 });

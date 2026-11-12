@@ -164,3 +164,39 @@ Not exercised: the editor actually opening, colour as rendered in a real termina
 5. T21: review real skill output against the prose standard.
 6. Try the `hands_on` and `accelerated` modes in a session.
 7. Projects created before 2026-11-12 need `learnbuild install --force` to get the current skills and hooks.
+8. The personal copy of `learn-new` in `~/.claude/skills` overrides a project's copy and is rewritten only by `learnbuild new`. `learnbuild install --force` and `learnbuild open` leave an old one in place.
+9. In a headless run, a natural "next" that leads to planning could not run `learnbuild plan apply` because the command was not pre-approved. Check whether an interactive session shows a permission prompt there.
+
+## 2026-11-12 — Reviewing the brief before planning
+
+- `/learn-new` now ends the brief stage by offering `review` or `next` (D36). The skill has a walk-through for the review, and the per-message hook points to it while there is a brief and no plan.
+- The project `CLAUDE.md` allows a stage to end with two ways to continue where a skill offers them.
+- 240 tests passing, two of them new: the hook note for this stage, and the offer's wording in the skill.
+
+Live check (Sonnet, headless, user-level settings excluded, scratch project):
+- After the brief was written the reply ended with both words. "review" started the walk-through at the first section of `PROJECT.md`.
+- "yeah thats right" moved to the next section. "what does done when mean?" was answered and the review returned to the same section.
+- "actually can the kids lists be first on the page" changed `PROJECT.md` and R1 in `REQUIREMENTS.md`, and no other file was created. The state revision stayed at 0 throughout.
+- In a fresh session, "can we go over the requirements before planning" got all five requirements in one table with two suggestions, not the part-by-part walk-through. "next" then ran planning.
+
+Not exercised: a full walk-through to the last requirement, the review after a plan exists, and an interactive session.
+
+## 2026-11-12 — Tests introduced in their own step
+
+- `/learn-plan` and `/learn-build` changed as described in D37. The example plan in the plan skill has a third task, `add-tests`.
+- 241 tests passing. One is new and checks the wording of both skills and the shape of the example plan.
+
+Live check (Sonnet, headless, scratch project with an existing brief):
+- `/learn-plan` produced five steps: setup, two features, "Add automated tests for the people list and adding chores", then a last feature whose criteria include a test run. The setup and feature criteria before the testing step were `curl` checks.
+- `/learn-build` built the setup step with no test files and no testing tool, and verified it with `curl`.
+
+Not exercised: the testing step itself, and the steps on either side of it.
+
+## 2026-11-12 — Mainstream tools, each with a reason
+
+- `/learn-plan` and `/learn-build` changed as described in D38.
+- 242 tests passing. One is new and checks the wording of both skills.
+
+Live check (Sonnet, headless, scratch project with an existing brief): `/learn-plan` chose TypeScript, Node.js with npm, Vite, Vitest and jsdom, with plain HTML and CSS for the page. The table had a row for each with a reason and the alternatives, and marked the two testing tools as added in step 4. The storage decision offered `browser-storage` or `json-file`.
+
+Not exercised: a build step that needs a tool the plan did not list.

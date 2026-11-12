@@ -296,10 +296,14 @@ async function nextStepInstruction(root: string, state: ProjectState): Promise<s
     return 'the project cannot move on until the decision above is made. Show the question and the options again, and tell the learner to reply with the name of the option they want.';
   }
   if (state.status === 'executing') return 'continue the task in progress by following the learn-build skill.';
-  const brief = await readFile(join(root, STATE_DIR, 'PROJECT.md'), 'utf8').catch(() => BRIEF_PLACEHOLDER);
-  if (brief.includes(BRIEF_PLACEHOLDER)) return 'the brief is not written yet, so follow the learn-new skill.';
+  if (!(await briefIsWritten(root))) return 'the brief is not written yet, so follow the learn-new skill.';
   if (Object.keys(state.tasks).length === 0) return 'there is a brief but no plan, so follow the learn-plan skill.';
   return 'follow the learn-build skill to start or continue the next step.';
+}
+
+async function briefIsWritten(root: string): Promise<boolean> {
+  const brief = await readFile(join(root, STATE_DIR, 'PROJECT.md'), 'utf8').catch(() => BRIEF_PLACEHOLDER);
+  return !brief.includes(BRIEF_PLACEHOLDER);
 }
 
 /**
@@ -381,10 +385,18 @@ export async function promptContext(hookInput: string): Promise<string> {
       pending
         ? `Do not record a decision from this message. A choice counts only when the learner replies with exactly one of the option names: ${pending.options.join(' or ')}. If they seem to be choosing, tell them which name to reply with.`
         : 'Do not record any decision from this message.',
-      state.status === 'executing'
-        ? 'Answering a question does not change the task in progress. Carry on with the task only if the learner asks you to continue.'
-        : 'Do not create or edit project files and do not start a task. Tell the learner they can say "next" when they want to move on.',
     );
+    if (state.status === 'executing') {
+      lines.push('Answering a question does not change the task in progress. Carry on with the task only if the learner asks you to continue.');
+    } else if (!pending && Object.keys(state.tasks).length === 0 && (await briefIsWritten(root))) {
+      lines.push(
+        'The brief is written and there is no plan yet. If the learner asks to review, go through or change the brief or the requirements, follow "Going through the brief" in the learn-new skill. ' +
+          'Changes they ask for may be written to .learn-build/PROJECT.md and .learn-build/REQUIREMENTS.md.',
+        'Do not create or edit any other project files and do not start a task. Tell the learner they can say "next" when they want to move on to planning.',
+      );
+    } else {
+      lines.push('Do not create or edit project files and do not start a task. Tell the learner they can say "next" when they want to move on.');
+    }
   }
   return lines.join('\n');
 }

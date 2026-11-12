@@ -44,7 +44,7 @@ Then continue below. Keep the `Version control:` line when you rewrite the file.
 
 ### The brief
 
-If the brief is already written, summarise it in a few lines and ask whether they want to change anything. If not, tell them to say **next** to plan the building steps.
+If the brief is already written, summarise it in a few lines and make the offer under "Review or move on" below.
 
 If it says the brief has not been written yet, find out what they want to build. Ask these one at a time, skipping any they have already answered, including under "Idea so far":
 
@@ -61,8 +61,34 @@ Then write two files:
 - `.learn-build/PROJECT.md`: keep the title line, replace the placeholder text, and add short sections for the idea, who it is for, what the first version does (a few things a user can do), what is left for later, where it runs, and the learner's experience.
 - `.learn-build/REQUIREMENTS.md`: a numbered list (R1, R2, …) of what the first version must do, each with a plain "Done when …" line that someone could check by using the software.
 
-Read the summary back in a few lines and ask the learner to correct anything. Update the files if they do.
+Do not create any other files, choose technology, install anything or write code in this step. Write and change these files with the Write and Edit tools; shell commands that write files are blocked until a task is started.
 
-When they are happy, tell them to say **next**, and that the next stage turns this into a short list of building steps.
+### Review or move on
 
-Write these files with the Write tool; shell commands that write files are blocked until a task is started. Do not create any other files, choose technology, install anything or write code in this step.
+Once both files exist, read the summary back in a few lines and tell the learner where the files are. Then give them two ways to continue, naming both words, and stop:
+
+- **review** goes through the brief and the requirements with them one part at a time, so they can change anything before planning.
+- **next** moves on to planning, which turns the brief into a short list of building steps.
+
+Do not phrase the offer as a yes-or-no question, because a bare "yes" is read as a go-ahead. If their reply does not show which they want, ask once more with the two words. If they reply with a correction instead, update the files and make the offer again.
+
+### Going through the brief
+
+Follow this when the learner says "review" or asks in their own words to go through, check or change the brief or the requirements. A learner who asks for one specific change gets that change and the offer again, without the full walk-through.
+
+Start by saying in a sentence what each file is for: `PROJECT.md` describes what is being built and who it is for, and `REQUIREMENTS.md` lists what the first version must do. Tell them that saying **next** at any point ends the review and moves on to planning, and that any other reply is taken as their answer.
+
+1. Go through `PROJECT.md` one section at a time. Say what the section currently records in a sentence or two, ask whether it is right or needs changing, and wait for the answer.
+2. Go through `REQUIREMENTS.md` one requirement at a time. Show the requirement and its "Done when" line as written, and ask whether it describes what they want. If a "Done when" line could not be checked by using the software, or it says how something will be built instead of what the user can do, suggest clearer wording and give the reason in a sentence.
+3. After the last requirement, ask whether anything they expected to see is missing. Then ask whether anything on the list could wait for a later version, and move whatever they defer to the "left for later" section of `PROJECT.md`.
+
+While going through:
+
+- When the learner asks for a change, make it straight away, change only what they asked for, and confirm it in one line. Keep the requirements numbered in order with no gaps.
+- When they ask a question, answer it and return to the part you were on. The review does not move forward because a question was asked.
+- Suggest a change only when something is unclear, cannot be checked or is too big for a first version. The learner decides whether to take the suggestion.
+- Keep technology out of it. If they ask which language or tools will be used, tell them planning covers that and explains each choice.
+
+When the last part is done, or the learner says they have seen enough, list what changed in a few lines, or say that nothing did. Then tell them to say **next** to plan the building steps.
+
+If building steps already exist when the learner asks for a review, go through the files the same way. Tell them once that the steps were planned from the earlier wording, and that a changed or added requirement may need a new step, which `/learn-plan` can add.

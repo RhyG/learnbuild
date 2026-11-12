@@ -71,7 +71,7 @@ From there you are in a conversation. It goes through three stages:
 
 | Stage | What happens | What you do |
 |---|---|---|
-| 🌱 Your idea | A few plain questions about what you want to build and who it is for. No technical questions. | Answer in your own words |
+| 🌱 Your idea | A few plain questions about what you want to build and who it is for. No technical questions. LearnBuild then writes a short brief and a list of requirements. | Answer in your own words, then say `review` to go through what was written and change it, or `next` to move on |
 | 🧭 The plan | A short list of building steps, the tools chosen for you with the reason for each, and any choices left to you. | Ask about anything, then say `next` |
 | 🔨 Building | One step at a time: LearnBuild writes the code, shows you the important parts, runs the checks and tells you how to try it yourself. | Say `next` for each step |
 
@@ -83,6 +83,7 @@ You do not need to remember commands. These work at any point:
 |---|---|
 | `next` | Moves on to the next step. "start" and "ok" work too. |
 | the name of an option | Makes a choice when you are asked to pick, for example "sqlite". |
+| `review` | After your brief is written, goes through it and the requirements with you one part at a time so you can change them before planning. |
 | any question | Gets an answer. Asking never changes your files or moves the project on. |
 
 A choice only counts when you reply with the option's exact name. If you say "the simple one", LearnBuild asks you to confirm by name, so that a passing remark is never taken as a decision.

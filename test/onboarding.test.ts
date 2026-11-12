@@ -679,6 +679,70 @@ describe('starting a task and recording a decision need the learner\'s own messa
 describe('per-message context (UserPromptSubmit)', () => {
   const context = (root: string, prompt: string) => promptContext(JSON.stringify({ hook_event_name: 'UserPromptSubmit', cwd: root, prompt }));
 
+  test('tools are chosen for being common and established, and each choice is explained', async () => {
+    const rendered = await renderTemplates();
+    const plan = rendered.get('skills/learn-plan/SKILL.md')!;
+    assert.match(plan, /Pick the tool most developers use for that job today/);
+    assert.match(plan, /widely adopted, used in production for years, actively maintained and well documented/);
+    assert.match(plan, /Do not pick a tool that is niche, experimental, newly released or no longer maintained/);
+    assert.match(plan, /List every tool the project will use with the reason it was chosen/);
+    assert.match(plan, /one row for every tool the project will use/);
+    const build = rendered.get('skills/learn-build/SKILL.md')!;
+    assert.match(build, /tell the learner what it is and why you chose it before installing it/);
+  });
+
+  test('tests are left out of setup and introduced in a step of their own', async () => {
+    const rendered = await renderTemplates();
+    const plan = rendered.get('skills/learn-plan/SKILL.md')!;
+    assert.match(plan, /The first task sets up the project so that it can be run\. It adds no automated tests and no testing tools\./);
+    assert.match(plan, /Give automated testing a task of its own, tagged `automated-testing`/);
+    const example = JSON.parse(/```json\n([\s\S]*?)```/.exec(plan)![1]!) as PlanInput;
+    const tagged = example.tasks.filter((t) => t.competencyIds?.includes('automated-testing')).map((t) => t.id);
+    assert.deepEqual(tagged, ['add-tests']);
+    assert.doesNotMatch(JSON.stringify(example.tasks[0]), /test/i);
+    assert.ok(example.tasks.findIndex((t) => t.id === 'add-tests') > 1, 'testing follows a working feature');
+
+    const build = rendered.get('skills/learn-build/SKILL.md')!;
+    assert.match(build, /Until that step has started, do not write tests or install a testing tool/);
+    assert.match(build, /### The testing step/);
+    assert.match(build, /Put the code back and run the test again/);
+  });
+
+  test('the learn-new skill offers a review of the brief or moving on, by name', async () => {
+    const newSkill = (await renderTemplates()).get('skills/learn-new/SKILL.md')!;
+    assert.match(newSkill, /\*\*review\*\* goes through the brief and the requirements/);
+    assert.match(newSkill, /\*\*next\*\* moves on to planning/);
+    assert.match(newSkill, /Do not phrase the offer as a yes-or-no question/);
+    assert.match(newSkill, /### Going through the brief/);
+  });
+
+  test('between the brief and the plan, a request to review is routed to the brief walk-through', async () => {
+    const { root } = await newProject('Review Test');
+    const repo = new ProjectRepository(root);
+    const NOTE = /follow "Going through the brief" in the learn-new skill/;
+
+    assert.doesNotMatch(await context(root, 'review'), NOTE, 'no brief to review yet');
+
+    await writeFile(join(root, '.learn-build', 'PROJECT.md'), '# Review Test\n\nA real brief.\n');
+    const before = (await repo.workflow.read()).revision;
+    for (const prompt of ['review', 'can we go through the requirements?', 'change R2 so it also shows the score']) {
+      const text = await context(root, prompt);
+      assert.match(text, NOTE, prompt);
+      assert.match(text, /may be written to \.learn-build\/PROJECT\.md and \.learn-build\/REQUIREMENTS\.md/, prompt);
+      assert.match(text, /Do not create or edit any other project files and do not start a task/, prompt);
+      const start = await preToolDecision(JSON.stringify({ cwd: root, tool_name: 'Bash', tool_input: { command: "learnbuild task start --id setup --confirm-ref 'x'" } }));
+      assert.ok(start !== 'pass' && !start.allowed, prompt);
+    }
+    assert.equal((await repo.workflow.read()).revision, before, 'reviewing does not touch workflow state');
+
+    const go = await context(root, 'next');
+    assert.match(go, /no plan, so follow the learn-plan skill/);
+    assert.doesNotMatch(go, NOTE);
+
+    await repo.updateWorkflow((s) => applyPlan(s, PLAN, AT));
+    assert.doesNotMatch(await context(root, 'review'), NOTE, 'once a plan exists the general rules apply');
+  });
+
   test('free text during a pending decision gets the state and the question rules', async () => {
     const repo = await authProject();
     const text = await context(repo.paths.root, 'what is a token?');

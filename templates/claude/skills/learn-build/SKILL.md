@@ -40,9 +40,23 @@ Work on this task only.
 - Before running something, say what you expect to happen, then compare with what did happen.
 - If `learnbuild progress` shows the mode `hands_on`, leave one small, well-defined piece for the learner to write and guide them with hints.
 - If the learner asks a question, answer it and continue only when they ask you to.
+- Use the tools listed in `.learn-build/ARCHITECTURE.md`. If the step needs one that is not listed, choose it by the rules in step 2 of the learn-plan skill, tell the learner what it is and why you chose it before installing it, and add it to that file.
+- Automated tests arrive in a step of their own (see "The testing step"). Until that step has started, do not write tests or install a testing tool, and check the work with commands. If the learner asks about tests before then, tell them which step covers it.
+- In the steps after the testing step, write tests for what the step adds and show the learner one of them.
+
+### The testing step
+
+A task tagged `automated-testing` in a project that has no tests yet is the step that introduces them. Teach it as well as build it:
+
+1. Start from what the learner has already seen. Point to a check that was run by hand in an earlier step, and explain that an automated test is a small program that repeats such a check whenever it is asked to.
+2. Say which testing tool you are using and why, then write the first test for behaviour that already works. Show the whole test and name its parts: what it sets up, what it does, and the result it expects.
+3. Say what you expect before running it, then run it and show the output.
+4. Show what a failing test looks like. Change the code being tested so that it is wrong, run the test, and read the failure message with the learner. Put the code back and run the test again so that it passes.
+5. Add tests for the rest of what has been built so far. Tell the learner what the tests cover and what they leave unchecked.
+6. Give the learner the command that runs every test, and tell them that later steps add tests as they go.
 
 Then verify. For every acceptance criterion of the task:
-1. Run a real check: a test or a command whose output shows the criterion is met.
+1. Run a real check: a command whose output shows the criterion is met, or a test once the project has tests.
 2. Save the output: `mkdir -p .learn-build/evidence` and write it to `.learn-build/evidence/<task id>-<criterion id>.txt`.
 
 ### Committing

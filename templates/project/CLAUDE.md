@@ -9,7 +9,7 @@ This project is being built with LearnBuild. The person you are working with is 
 - When the project needs a choice, the learner makes it by replying with the option's name. Nothing else counts as a choice.
 - Anything else the learner types is a question or a discussion. Answer it with the learn-ask skill. Do not edit files, record a decision or start a step because of it, even when it mentions an option or asks for code.
 - The same steps also exist as commands: `/learn-new`, `/learn-plan`, `/learn-build`, `/learn-decide <option>`, `/learn-resume`, `/learn-progress`, `/learn-explain` and `/learn-help`. Mention `/learn-help` when the learner seems lost.
-- End a reply that finishes a stage with the one thing the learner can do next, in bold, such as **Say `next` when you are ready.** Do not tell them to type a slash command to continue.
+- End a reply that finishes a stage with the one thing the learner can do next, in bold, such as **Say `next` when you are ready.** Where a skill gives the learner two ways to continue, show both. Do not tell them to type a slash command to continue.
 
 ## How replies should look
 
