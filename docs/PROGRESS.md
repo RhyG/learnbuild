@@ -159,7 +159,7 @@ Not exercised: the editor actually opening, colour as rendered in a real termina
 ### Open items
 1. Run the whole journey in an interactive terminal session: `learnbuild new` launching Claude Code, the editor opening, colour, the shell left in the project folder, and the permission prompts a learner sees.
 2. Add a `LICENSE` file; `package.json` says MIT and the repository has none. Do this before making the repository public.
-3. Publish the package or provide an install script, so setup does not need `npm link`.
+3. Publish the package. Until then `./setup.sh` installs it (D39).
 4. Hardened read-only Git diff for `/learn-explain --changed`.
 5. T21: review real skill output against the prose standard.
 6. Try the `hands_on` and `accelerated` modes in a session.
@@ -200,3 +200,15 @@ Not exercised: the testing step itself, and the steps on either side of it.
 Live check (Sonnet, headless, scratch project with an existing brief): `/learn-plan` chose TypeScript, Node.js with npm, Vite, Vitest and jsdom, with plain HTML and CSS for the page. The table had a row for each with a reason and the alternatives, and marked the two testing tools as added in step 4. The storage decision offered `browser-storage` or `json-file`.
 
 Not exercised: a build step that needs a tool the plan did not list.
+
+## 2026-11-12 — One setup script
+
+- `./setup.sh` replaces `npm install`, `npm run build` and `npm link` for a new user (D39). The README install section now gives that one command.
+- 244 tests passing. Two are new: the script stops on an old Node.js before installing anything, and the README no longer mentions `npm link`.
+
+Checked by hand on macOS with a fresh clone and a scratch npm prefix, so the owner's linked `learnbuild` was not replaced:
+- A full run installed, built and linked, and `learnbuild help` ran from the scratch prefix.
+- With the scratch prefix off `PATH`, the script printed the `export PATH` line; with the owner's copy earlier on `PATH`, it named that copy.
+- With no Claude Code on `PATH` it printed the setup link. With Node.js 18 and with no Node.js it stopped with exit code 1 and a message.
+
+Not exercised: Linux, a failing download or build, and an `npm link` permission error.

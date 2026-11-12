@@ -42,12 +42,12 @@ To check Node.js is installed, type `node --version` in your terminal. You shoul
 LearnBuild is not in the npm package registry yet, so for now you install it from this folder. In your terminal, go to the LearnBuild folder and run:
 
 ```sh
-npm install
-npm run build
-npm link
+./setup.sh
 ```
 
-The last command makes `learnbuild` available everywhere on your computer. To check it worked, type `learnbuild help`.
+The script checks that Node.js is new enough, downloads what LearnBuild depends on, builds it and makes the `learnbuild` command available everywhere on your computer. It takes about a minute and tells you if anything is missing. To check it worked, type `learnbuild help`.
+
+Run the same script again whenever you update the LearnBuild folder.
 
 ## Start your first project
 

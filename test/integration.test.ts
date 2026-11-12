@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { describe, test } from 'node:test';
@@ -331,5 +331,25 @@ describe('skill templates match the real CLI', () => {
     const { state } = applyPlan(createProject({ projectId: 'example' }), plan, AT);
     assert.deepEqual(Object.keys(state.tasks), ['setup', 'create-game', 'add-tests']);
     assert.equal(state.checkpoints['storage-gate']?.blocking, true);
+  });
+});
+
+describe('setup.sh', () => {
+  const SCRIPT = fileURLToPath(new URL('../../setup.sh', import.meta.url));
+  const run = (path: string) => spawnSync('/bin/sh', [SCRIPT], { env: { PATH: path }, encoding: 'utf8' });
+
+  test('stops with a plain message when Node.js is too old, before installing anything', async () => {
+    const shim = await tempDir('learnbuild-shim-');
+    await writeFile(join(shim, 'node'), '#!/bin/sh\nif [ "$1" = "-p" ]; then echo 18; else echo v18.19.0; fi\n', { mode: 0o755 });
+    const old = run(`${shim}:/usr/bin:/bin`);
+    assert.equal(old.status, 1);
+    assert.match(old.stderr, /needs Node\.js version 22 or newer and this computer has v18\.19\.0/);
+    assert.doesNotMatch(old.stdout, /1 of 3/);
+  });
+
+  test('the README installs with the script alone', async () => {
+    const readme = await readFile(fileURLToPath(new URL('../../README.md', import.meta.url)), 'utf8');
+    assert.match(readme, /```sh\n\.\/setup\.sh\n```/);
+    assert.doesNotMatch(readme, /npm link/);
   });
 });
