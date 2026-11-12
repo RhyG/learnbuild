@@ -9,7 +9,7 @@ allowed-tools: Bash(learnbuild status), Bash(learnbuild next), Bash(learnbuild p
 The learner may be new to programming. Explain each technical word once, in a sentence, when it first appears.
 
 1. Run `learnbuild status`, then read `.learn-build/PROJECT.md` and `.learn-build/REQUIREMENTS.md`.
-   - If there is no project or the brief has not been written, tell the learner to run `/learn-new` and stop.
+   - If there is no project or the brief has not been written, follow the learn-new skill instead.
    - If `learnbuild next` shows tasks already exist, show the learner the current plan and ask what they want to add or change. Add new tasks with a new plan file; existing tasks cannot be edited here.
 
 2. Choose the simplest design that meets the requirements. Prefer TypeScript on Node.js, few dependencies, data stored on the learner's own computer, and nothing that needs a paid account or cloud service. Write `.learn-build/ARCHITECTURE.md` in plain language: the parts of the system, what each one is responsible for, how they talk to each other, and why you chose each. Say which choices are yours and which are left for the learner to decide.
@@ -60,9 +60,9 @@ The learner may be new to programming. Explain each technical word once, in a se
 
 8. Present the plan to the learner in three short parts.
    - **The steps.** Show the `display` checklist from `learnbuild next` in a code block, then one line per step on what they will be able to do after it.
-   - **What I chose for you, and why.** A table with one row per main choice you made, such as the language, how the parts talk to each other, and where data is kept. Columns: the choice, why it suits this project in a few words, and what else was possible. Keep it to the choices that shape the project, usually between three and six. Do not send the learner to a file to find this out.
+   - **What I chose for you, and why.** A table with one row per main choice you made, such as the language and where data is kept. Columns: the choice, why it suits this project in a few words, and what else was possible. Keep it to the choices that shape the project, usually between three and six. Do not send the learner to a file to find this out.
    - **What you will decide.** Each decision left to them, in one line.
 
-   Then invite them to dig in: they can ask about any row, ask why an alternative was not picked, or ask for a different choice. Mention once that the longer write-up is in `.learn-build/ARCHITECTURE.md`. End by telling them to say **next** to start the first step.
+   Then invite them to dig in: they can ask about any row or ask for a different choice. Mention once that the longer write-up is in `.learn-build/ARCHITECTURE.md`. End by telling them to say **next** to start the first step.
 
 Write the notes and the plan file with the Write tool; shell commands that write files are blocked until a task is started. Do not create source files, install anything or start a task in this step.

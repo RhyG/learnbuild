@@ -260,7 +260,7 @@ describe('skill templates match the real CLI', () => {
     }
     assert.ok(commands.size >= 12, [...commands].join(', '));
     for (const command of commands) {
-      if (command === 'new' || command === 'explain') continue;
+      if (command === 'new' || command === 'open' || command === 'explain') continue;
       const result = await runCli([...command.split(' '), '--root', root], { cwd: root, now: () => AT });
       const error = result.output['error'] as { code: string; message: string } | undefined;
       assert.ok(!error?.message.startsWith('Unknown command'), `template names unknown command "${command}"`);

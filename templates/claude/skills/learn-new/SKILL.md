@@ -9,7 +9,7 @@ allowed-tools: Bash(learnbuild status), Bash(learnbuild new *), Bash(learnbuild 
 
 What the learner typed after the command: $ARGUMENTS
 
-The learner may never have programmed. Use everyday words, ask one question at a time and wait for each answer.
+The learner may never have programmed. Use everyday words and ask one question at a time, waiting for each answer.
 
 Run `learnbuild status` first. What it returns decides which part below applies.
 
@@ -18,9 +18,9 @@ Run `learnbuild status` first. What it returns decides which part below applies.
 1. Settle on a project name without an extra question where you can. If the learner gave a name, use it. If they described an idea but gave no name, make a short name from the idea, two or three words long. Only if they gave neither, ask "What would you like to call your project?" and wait.
 2. Run `learnbuild new --name '<name>' --no-launch`. If you had to ask for the name, Claude Code may ask the learner to approve this command; tell them that approving it creates the folder. Drop any apostrophes from the name. This creates a new folder inside the current one and prints its path.
 3. If the learner has already described their idea, add it under an "Idea so far" heading at the end of `<new folder>/.learn-build/PROJECT.md`, so they do not have to repeat it.
-4. Tell the learner the project folder is ready, what you called it if you chose the name, and that Claude Code needs to be opened inside it. Mention that they can also open that folder in a code editor such as VS Code to watch the files as they are written. Give them these steps exactly, with the real path:
+4. Tell the learner the project folder is ready, what you called it if you chose the name, and that Claude Code needs to be opened inside it. Mention that they can also open that folder in a code editor such as VS Code to watch the files as they are written. Give them these two steps exactly, with the real folder name:
    - Leave this session by typing `/exit`.
-   - Run `cd "<path>"` and then `claude "/learn-new"`.
+   - Run `learnbuild open <folder name>`. It moves into the folder and opens Claude Code there.
 5. Stop there. The project's commands and safeguards load only when Claude Code starts in that folder, so do not continue the conversation about the idea in this session.
 
 If `learnbuild` is not found, tell the learner LearnBuild is not installed on this computer and stop.
@@ -52,9 +52,9 @@ If it says the brief has not been written yet, find out what they want to build.
 2. Who will use it, and what is the main thing they will do with it?
 3. What is the smallest version that would already be useful? If they are unsure, suggest one and ask if it sounds right.
 4. Where should it run: in a web browser, on a phone, or only on your own computer? If they do not know, recommend a web page running on their own computer, because it needs no accounts or payments.
-5. Have you written any code before? Any answer is fine; it sets how much you explain.
+5. Have you written any code before? Use the answer to set how much you explain.
 
-Do not ask about programming languages, databases or tools. Those come later, with explanations.
+Do not ask about programming languages or tools. Those come later, with explanations.
 
 Then write two files:
 

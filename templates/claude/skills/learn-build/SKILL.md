@@ -1,10 +1,10 @@
 ---
 name: learn-build
-description: Start or continue the next LearnBuild step, teaching as it goes and verifying the result. Use when the learner runs /learn-build or gives a go-ahead such as "next", "start" or "continue" and the project has a plan.
+description: Start or continue the next LearnBuild step, teaching as it goes and verifying the result. Use when the learner runs /learn-build or gives a go-ahead such as "next" or "start" and the project has a plan.
 allowed-tools: Bash(learnbuild next), Bash(learnbuild status), Bash(learnbuild progress), Bash(learnbuild decision request *), Bash(learnbuild task start *), Bash(learnbuild task verify *), Bash(learnbuild checkpoint satisfy *), Bash(learnbuild checkpoint defer *), Bash(learnbuild learner evidence *), Write, Edit
 ---
 
-# Build the next task
+# Build the next step
 
 The learner asked to move on, by running `/learn-build` or by saying something like "next". That is their instruction to start or continue one step. The project allows a step to start only on a turn where the learner's message was a go-ahead, so never start one for any other reason.
 
@@ -17,16 +17,17 @@ There are no tasks yet. Follow the learn-plan skill now (or learn-new if there i
 The next task needs a choice from the learner. Run `learnbuild decision request --id <decisionId>`, then handle it as `await_decision`.
 
 ## `await_decision`
-Show the decision's question and its options exactly as written. Explain each option in a few sentences using this project: what it means and what it makes easier or harder. Lay the options out as a small table: the option name, what it means here, and what it makes easier or harder. Do not pick one unless the learner asks for your recommendation. Tell them they can ask anything first, and that they choose by replying with the option's name. Stop; build nothing.
+Show the decision's question and its options exactly as written. Lay the options out as a small table with the option name, what it means in this project, and what it makes easier or harder. Do not pick one unless the learner asks for your recommendation. Tell them they can ask anything first, and that they choose by replying with the option's name. Then stop without building anything.
 
 ## `await_evidence`
 The next task has an understanding check.
-- If you have not yet asked the check in this conversation, ask one question that has the learner predict what the code will do or explain a part of the design in their own words. Do not hint at the answer. Tell them to answer in their own words. Stop.
+- If you have not yet asked the check in this conversation, ask one question that has the learner predict what the code will do or explain a part of the design in their own words. Do not hint at the answer. Ask them to reply in their own words, then stop.
 - If the learner has answered it in this conversation, assess the answer honestly. After an answer that does not yet show understanding, they continue by answering again; after one that does, they say "next".
   - If it shows understanding, record it and satisfy the checkpoint:
     `learnbuild learner evidence --id '<short-unique-id>' --competency <competency id> --type <explained or predicted> --level <1 or 2> --source-ref 'learn-build-${CLAUDE_SESSION_ID}' --assessor agent --confidence <medium or high>`
     then `learnbuild checkpoint satisfy --id <checkpoint id> --evidence-ref '<the evidence id>'`, then run `learnbuild next` again and continue.
   - If it does not, explain the idea a different way using this project's code, ask a fresh question and stop. Saying "I understand" is not an answer.
+- The check cannot be skipped. If the learner says they do not know, or asks to move on, explain the idea again from a different angle and ask an easier question about the same idea.
 
 ## `start_task`
 1. Tell the learner what this task adds and why it comes now, in a few sentences. Name the one or two ideas they will meet.
@@ -56,12 +57,11 @@ From the fourth commit on, the command runs without a pause. Give the commit lin
 
 Write a commit message that says what the step added, in plain words. After committing, show the line `git log --oneline -1` prints.
 
-Do not include files that should stay private, such as `.env`. Never push, add a remote or suggest a hosting service unless the learner asks.
+Do not include files that should stay private, such as `.env`. Never push or add a remote unless the learner asks, and do not bring up hosting services yourself.
 
 If the learner has said they would rather make commits themselves, do not commit. Give them the commands to run, wait for them to say it is done, and note the preference on the `Version control:` line of `.learn-build/PROJECT.md` so later sessions follow it.
 
 ### Recording the result
-
 
 Record the results in one command, with one `--result` per criterion:
 `learnbuild task verify --id <task id> --result '<criterion id>=pass@.learn-build/evidence/<file>' --result '<criterion id>=fail@.learn-build/evidence/<file>'`
@@ -72,7 +72,7 @@ When the task is verified:
 - Tell the learner what now exists and give the exact command to run or try it themselves.
 - Say what was checked and anything that was not.
 - Show the updated checklist from `learnbuild next`.
-- Stop. One step per go-ahead. End by telling them to say **next** when they are ready for the following step.
+- Stop after this one step, and end by telling them to say **next** when they are ready for the following one.
 
 ## `done`
 Every planned step is complete. Tell the learner what they have built, and that saying what they want to add next will start a new plan.
