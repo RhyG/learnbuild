@@ -51,10 +51,10 @@ If it says the brief has not been written yet, find out what they want to build.
 1. What do you want to build? Describe it however you like.
 2. Who will use it, and what is the main thing they will do with it?
 3. What is the smallest version that would already be useful? If they are unsure, suggest one and ask if it sounds right.
-4. Where should it run: in a web browser, on a phone, or only on your own computer? If they do not know, recommend a web page running on their own computer, because it needs no accounts or payments.
+4. Where should it run? Give examples that fit the idea, such as a page in a web browser, an app on a phone, a program started from the terminal, or a script that runs on its own. If they do not know and the idea suits a web page, recommend a web page running on their own computer, because it needs no accounts or payments.
 5. Have you written any code before? Use the answer to set how much you explain.
 
-Do not ask about programming languages or tools. Those come later, with explanations.
+Do not ask about programming languages or tools. Those come later, with explanations. If the learner names a language or tool they want to use or learn, record it in `PROJECT.md` under a "Learner's preferences" heading so that planning uses it.
 
 Then write two files:
 

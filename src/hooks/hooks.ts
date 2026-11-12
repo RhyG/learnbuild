@@ -11,8 +11,30 @@ import { addFollowUp, openQuestion } from '../threads/threads.js';
 
 const EDIT_TOOLS: ReadonlySet<string> = new Set(['Write', 'Edit', 'MultiEdit', 'NotebookEdit']);
 
-const WRITING_COMMANDS =
-  /(?:^|[\s;&|(])(?:tee|rm|rmdir|mv|cp|touch|truncate|dd|patch|chmod|ln)(?=\s|$)|\bsed\s+(?:-[a-zA-Z]*i|--in-place)|\bperl\s+-[a-zA-Z]*i|\bnpm\s+(?:install|i|ci|init|uninstall|update|add|remove)\b|\b(?:npx|pnpm|yarn|bun)\b|\bpip3?\s+install\b|\bgit\s+(?:add|commit|checkout|switch|restore|reset|revert|merge|rebase|stash|apply|am|clean|rm|mv|pull|cherry-pick)\b/;
+// Package managers and project generators of other languages. Each changes
+// files in the project, so they wait for a task like any other write.
+const PACKAGE_MANAGER_WRITES = [
+  String.raw`\b(?:pip3?|python3?\s+-m\s+pip)\s+(?:install|uninstall)\b`,
+  String.raw`\bpython3?\s+-m\s+venv\b`,
+  String.raw`\b(?:uv|poetry|pipenv|pdm)\s+(?:add|remove|sync|lock|init|install|update|venv|pip|new)\b`,
+  String.raw`\b(?:conda|mamba)\s+(?:install|create|remove|update)\b`,
+  String.raw`\bcargo\s+(?:add|remove|rm|init|new|update|generate|fix|fmt)\b`,
+  String.raw`\bgo\s+(?:get|mod|work|generate|fmt)\b`,
+  String.raw`\bbundle\s+(?:install|add|update|init)\b`,
+  String.raw`\bcomposer\s+(?:require|install|update|remove|init|create-project)\b`,
+  String.raw`\bdotnet\s+(?:new|add|restore)\b`,
+  String.raw`\bswift\s+package\s+(?:init|update|resolve)\b`,
+  String.raw`\bmix\s+(?:new|deps\.get)\b`,
+  String.raw`\bdeno\s+(?:add|remove|init|install)\b`,
+].join('|');
+
+const WRITING_COMMANDS = new RegExp(
+  String.raw`(?:^|[\s;&|(])(?:tee|rm|rmdir|mv|cp|touch|truncate|dd|patch|chmod|ln)(?=\s|$)|\bsed\s+(?:-[a-zA-Z]*i|--in-place)|\bperl\s+-[a-zA-Z]*i|\bnpm\s+(?:install|i|ci|init|uninstall|update|add|remove)\b|\b(?:npx|pnpm|yarn|bun)\b|` + `${PACKAGE_MANAGER_WRITES}|` + String.raw`\bgit\s+(?:add|commit|checkout|switch|restore|reset|revert|merge|rebase|stash|apply|am|clean|rm|mv|pull|cherry-pick)\b`,
+);
+
+function stripQuoted(command: string): string {
+  return command.replace(/'[^']*'/g, "''").replace(/"(?:[^"\\]|\\.)*"/g, '""');
+}
 
 /**
  * Heuristic: does this shell command look like it changes files? It catches
@@ -22,11 +44,36 @@ const WRITING_COMMANDS =
  */
 export function looksLikeShellWrite(command: string): boolean {
   if (/<<-?\s*['"]?\w/.test(command)) return true;
-  const unquoted = command
-    .replace(/'[^']*'/g, "''")
-    .replace(/"(?:[^"\\]|\\.)*"/g, '""')
+  const unquoted = stripQuoted(command)
     .replace(/\d*>&\d+|&>\s*\/dev\/null|\d*>>?\s*\/dev\/null/g, ' ');
   return unquoted.includes('>') || WRITING_COMMANDS.test(unquoted);
+}
+
+const SYSTEM_INSTALLS = new RegExp(
+  [
+    String.raw`(?:^|[\s;&|(])sudo(?=\s|$)`,
+    String.raw`\b(?:curl|wget)\b[^|;&]*\|\s*(?:sudo\s+)?(?:ba|z|da)?sh\b`,
+    String.raw`\bbrew\s+(?:install|upgrade|reinstall|tap|link|bundle)\b`,
+    String.raw`\b(?:apt|apt-get|dnf|yum|zypper|snap|port|winget|choco|scoop)\s+(?:-\S+\s+)*(?:install|upgrade|add)\b`,
+    String.raw`\bapk\s+add\b`,
+    String.raw`\bpacman\s+-S`,
+    String.raw`\brustup-init\b|\brustup\s+(?:install|update|default|toolchain|component|target|self)\b`,
+    String.raw`\b(?:nvm|fnm|pyenv|rbenv|asdf|mise|volta|sdk)\s+(?:install|global|default)\b`,
+    String.raw`\buv\s+(?:python|tool)\s+install\b`,
+    String.raw`\b(?:cargo|go|pipx|gem)\s+install\b`,
+    String.raw`\b(?:npm|pnpm|yarn|bun)\s+(?:\S+\s+)*(?:-g|--global|global)(?=\s|$)`,
+    String.raw`\bpip3?\s+install\s+(?:\S+\s+)*--user\b`,
+  ].join('|'),
+);
+
+/**
+ * Heuristic: does this shell command install software for the whole computer
+ * or the learner's whole account, as opposed to into the project folder?
+ * Like looksLikeShellWrite it catches the ordinary forms and is not a
+ * security boundary.
+ */
+export function looksLikeSystemInstall(command: string): boolean {
+  return SYSTEM_INSTALLS.test(stripQuoted(command));
 }
 
 const COMMIT_MARKER = 'commit-intro.txt';
@@ -200,6 +247,8 @@ function parsePayload(input: string): Record<string, unknown> | null {
  *
  * - While no task is executing, shell commands that look like file writes are
  *   blocked too. That check is a heuristic (see looksLikeShellWrite).
+ * - Commands that install software outside the project folder are blocked at
+ *   any time; the learner runs those (see looksLikeSystemInstall).
  * - Each of a project's first three commits waits until the learner has been
  *   told about it and has replied (see earlyCommitDecision).
  * - `learnbuild task start` and `learnbuild decision resolve` run only on a
@@ -224,6 +273,17 @@ export async function preToolDecision(hookInput: string): Promise<HookOutcome> {
     if (authorised !== 'pass') return authorised;
     const earlyCommit = await earlyCommitDecision(root, command);
     if (earlyCommit !== 'pass') return earlyCommit;
+    if (looksLikeSystemInstall(command)) {
+      return {
+        allowed: false,
+        reason:
+          'LearnBuild blocked this command because it installs software outside the project folder, which the learner does themselves. ' +
+          'Guide them through it as "Checking the tools" in the learn-build skill describes: say what the tool is and why the project needs it, ' +
+          'then give numbered steps for this computer with the full download link, each command complete in its own code block, what they will see along the way, and the command that proves it worked. ' +
+          'Tell them they can ask you anything or paste an error while they do it, and to say "next" when it has finished. ' +
+          'You may run commands that only read, such as version checks, to help. Installing packages into the project folder is not affected.',
+      };
+    }
     if (!looksLikeShellWrite(command)) return 'pass';
     const status = await new ProjectRepository(root).workflow.read().then((state) => state.status, () => 'unreadable');
     if (status === 'executing') return 'pass';
@@ -387,7 +447,10 @@ export async function promptContext(hookInput: string): Promise<string> {
         : 'Do not record any decision from this message.',
     );
     if (state.status === 'executing') {
-      lines.push('Answering a question does not change the task in progress. Carry on with the task only if the learner asks you to continue.');
+      lines.push(
+        'Answering a question does not change the task in progress. Carry on with the task only if the learner asks you to continue.',
+        'If the learner is installing a tool you asked them to install and has a question, an error or output to show you, help them through it as "Checking the tools" in the learn-build skill describes. You may run commands that only read, such as version checks, to find the cause.',
+      );
     } else if (!pending && Object.keys(state.tasks).length === 0 && (await briefIsWritten(root))) {
       lines.push(
         'The brief is written and there is no plan yet. If the learner asks to review, go through or change the brief or the requirements, follow "Going through the brief" in the learn-new skill. ' +

@@ -22,7 +22,7 @@ import {
   verifyTask,
   type PlanInput,
 } from '../src/domain/workflow.js';
-import { COMMIT_BRIEFINGS, classifyPrompt, looksLikeShellWrite, preToolDecision, promptContext } from '../src/hooks/hooks.js';
+import { COMMIT_BRIEFINGS, classifyPrompt, looksLikeShellWrite, looksLikeSystemInstall, preToolDecision, promptContext } from '../src/hooks/hooks.js';
 import { parsePlan } from '../src/state/plan.js';
 import { ProjectRepository } from '../src/state/project.js';
 import { openQuestion } from '../src/threads/threads.js';
@@ -452,6 +452,16 @@ describe('edit gate (PreToolUse for the main session)', () => {
       'ls && touch PWNED',
       'cp a.ts b.ts',
       'mv a.ts b.ts',
+      'pip install requests',
+      'python3 -m venv .venv',
+      '.venv/bin/python -m pip install requests',
+      'uv add requests',
+      'poetry add requests',
+      'cargo add serde',
+      'cargo init',
+      'go mod init example.com/chores',
+      'go get github.com/spf13/cobra',
+      'bundle install',
     ];
     const reads = [
       'learnbuild status',
@@ -464,6 +474,11 @@ describe('edit gate (PreToolUse for the main session)', () => {
       'grep -rn "a > b" src',
       'mkdir -p .learn-build/plans',
       'cat package.json > /dev/null',
+      'cargo --version; rustc --version',
+      'cargo test 2>&1 | tail -20',
+      'go version && go test ./...',
+      'python3 --version',
+      '.venv/bin/python -m pytest -q',
     ];
     for (const command of writes) assert.equal(looksLikeShellWrite(command), true, command);
     for (const command of reads) assert.equal(looksLikeShellWrite(command), false, command);
@@ -474,6 +489,64 @@ describe('edit gate (PreToolUse for the main session)', () => {
     await repo.updateWorkflow((s) => startTask(s, { taskId: 'auth-01', authorisationRef: 'cmd', at: AT }));
     for (const command of writes) assert.equal(await bash(command), 'pass', `during a task: ${command}`);
     assert.equal(await preToolDecision(JSON.stringify({ cwd: await tempDir(), tool_name: 'Bash', tool_input: { command: 'rm -rf x' } })), 'pass', 'outside a project');
+  });
+
+  test('installs outside the project folder are blocked even during a task; project installs are not', async () => {
+    const repo = await authProject();
+    await repo.updateWorkflow((s) => resolveDecision(s, { decisionId: 'auth-strategy', selection: 'sessions', confirmationRef: 'm', at: AT }));
+    await repo.updateWorkflow((s) => startTask(s, { taskId: 'auth-01', authorisationRef: 'cmd', at: AT }));
+    const bash = (command: string) => preToolDecision(JSON.stringify({ cwd: repo.paths.root, tool_name: 'Bash', tool_input: { command } }));
+    const system = [
+      "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh",
+      'curl -fsSL https://example.com/install.sh | sudo bash',
+      'brew install go',
+      'sudo apt-get install -y python3',
+      'apt install golang',
+      'rustup update stable',
+      'rustup toolchain install nightly',
+      'pyenv install 3.13',
+      'nvm install 22',
+      'uv python install 3.13',
+      'cargo install ripgrep',
+      'go install golang.org/x/tools/gopls@latest',
+      'pipx install poetry',
+      'npm install -g typescript',
+      'pip install --user requests',
+      'cd /tmp && brew install sqlite',
+    ];
+    const local = [
+      'npm install express',
+      'cargo add serde',
+      'cargo build',
+      'go get github.com/spf13/cobra',
+      '.venv/bin/python -m pip install requests',
+      'python3 -m venv .venv',
+      'rustup show',
+      'brew --version',
+      'echo "run: brew install go"',
+      'go version',
+    ];
+    for (const command of system) {
+      assert.equal(looksLikeSystemInstall(command), true, command);
+      const outcome = await bash(command);
+      assert.ok(outcome !== 'pass' && !outcome.allowed, command);
+      assert.match(outcome.reason, /installs software outside the project folder, which the learner does themselves/);
+      assert.match(outcome.reason, /numbered steps for this computer with the full download link/);
+      assert.match(outcome.reason, /ask you anything or paste an error/);
+    }
+    for (const command of local) {
+      assert.equal(looksLikeSystemInstall(command), false, command);
+      assert.equal(await bash(command), 'pass', command);
+    }
+    assert.equal(await preToolDecision(JSON.stringify({ cwd: await tempDir(), tool_name: 'Bash', tool_input: { command: 'brew install go' } })), 'pass', 'outside a project');
+
+    for (const command of ['uname -sm', 'which go', 'echo $PATH', 'ls /usr/local/go/bin', '/usr/local/go/bin/go version', 'brew --version']) {
+      assert.equal(await bash(command), 'pass', `diagnostic: ${command}`);
+    }
+    const stuck = await promptContext(JSON.stringify({ cwd: repo.paths.root, prompt: 'it says zsh: command not found: go' }));
+    assert.match(stuck, /If the learner is installing a tool you asked them to install/);
+    assert.match(stuck, /You may run commands that only read/);
+    assert.equal((await repo.workflow.read()).status, 'executing');
   });
 
   test('other tools pass, and a corrupt state blocks edits', async () => {
@@ -689,6 +762,29 @@ describe('per-message context (UserPromptSubmit)', () => {
     assert.match(plan, /one row for every tool the project will use/);
     const build = rendered.get('skills/learn-build/SKILL.md')!;
     assert.match(build, /tell the learner what it is and why you chose it before installing it/);
+  });
+
+  test('the language comes from the brief, and missing tools are installed by the learner', async () => {
+    const rendered = await renderTemplates();
+    const brief = rendered.get('skills/learn-new/SKILL.md')!;
+    assert.match(brief, /record it in `PROJECT\.md` under a "Learner's preferences" heading/);
+    const plan = rendered.get('skills/learn-plan/SKILL.md')!;
+    assert.match(plan, /If `PROJECT\.md` records a language or tool the learner wants, use it/);
+    assert.match(plan, /For a web page or a web application, use TypeScript on Node\.js/);
+    assert.doesNotMatch(plan, /Prefer TypeScript/);
+    assert.match(plan, /Add a "What needs to be installed" section/);
+    assert.match(plan, /one acceptance criterion for each tool in "What needs to be installed"/);
+    const build = rendered.get('skills/learn-build/SKILL.md')!;
+    assert.match(build, /### Checking the tools/);
+    assert.match(build, /They run the install themselves/);
+    assert.match(build, /Run `uname -sm` for the operating system and the processor type/);
+    assert.match(build, /Put each command in its own code block, complete and ready to copy/);
+    assert.match(build, /End the list with the command that proves it worked/);
+    assert.match(build, /they can ask you anything while they do it/);
+    assert.match(build, /Run commands that only read to look for yourself/);
+    assert.match(build, /Never tell them to quit that application or close this window/);
+    assert.match(build, /Look in the place the installer puts it and run it from there by its full path/);
+    assert.match(build, /create a virtual environment in the project folder/);
   });
 
   test('tests are left out of setup and introduced in a step of their own', async () => {

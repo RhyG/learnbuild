@@ -158,14 +158,14 @@ Not exercised: the editor actually opening, colour as rendered in a real termina
 
 ### Open items
 1. Run the whole journey in an interactive terminal session: `learnbuild new` launching Claude Code, the editor opening, colour, the shell left in the project folder, and the permission prompts a learner sees.
-2. Add a `LICENSE` file; `package.json` says MIT and the repository has none. Do this before making the repository public.
-3. Publish the package. Until then `./setup.sh` installs it (D39).
+2. Done: `LICENSE` added (D41).
+3. Publish the package: `npm login`, then `npm publish` (D42). Afterwards change the README install section to lead with `npm install -g learnbuild`. Until then `./setup.sh` installs it (D39).
 4. Hardened read-only Git diff for `/learn-explain --changed`.
 5. T21: review real skill output against the prose standard.
 6. Try the `hands_on` and `accelerated` modes in a session.
 7. Projects created before 2026-11-12 need `learnbuild install --force` to get the current skills and hooks.
 8. The personal copy of `learn-new` in `~/.claude/skills` overrides a project's copy and is rewritten only by `learnbuild new`. `learnbuild install --force` and `learnbuild open` leave an old one in place.
-9. In a headless run, a natural "next" that leads to planning could not run `learnbuild plan apply` because the command was not pre-approved. Check whether an interactive session shows a permission prompt there.
+9. In headless runs with user-level settings excluded, a natural "next" could not run `learnbuild` commands. A trace showed the Skill tool call returning only "Execute skill: learn-build", after which `learnbuild next` needed approval, so a skill the model invokes did not get its `allowed-tools`. The slash commands worked. Check what an interactive session does, and whether the earlier natural-reply runs passed because of permissions in the owner's user settings.
 
 ## 2026-11-12 — Reviewing the brief before planning
 
@@ -212,3 +212,49 @@ Checked by hand on macOS with a fresh clone and a scratch npm prefix, so the own
 - With no Claude Code on `PATH` it printed the setup link. With Node.js 18 and with no Node.js it stopped with exit code 1 and a message.
 
 Not exercised: Linux, a failing download or build, and an `npm link` permission error.
+
+## 2026-11-12 — Projects in other languages
+
+- Language choice, tool checks, the system-install block, the wider write guard and four new competencies, as described in D40. The README has a section on projects that are not web pages.
+- 246 tests passing. Two are new: the system-install block with sixteen blocked and ten allowed commands, and the wording of the three skills. The write-guard test gained fifteen commands from other languages.
+
+Live checks (Sonnet, headless, slash commands, user-level settings excluded, on a Mac with Python 3.9.6 and no Go):
+- A photo-renaming script with no language named was planned in Python with Pillow, `argparse`, `venv` and pytest. The plan listed Python 3.10 as needing installation and said the Mac's 3.9 was too old.
+- A terminal to-do list from a learner who asked for Go was planned in Go. `PROJECT.md` recorded the preference and the plan listed Go 1.22.
+- In both projects the setup step ran the version command, wrote no files, and stopped with the install steps and the official link. Neither run attempted an install, so the hook's block was not triggered live.
+- Run again in a fresh session with Go still missing, the Go project checked again and repeated the instructions. The task stayed in progress.
+
+Not exercised: carrying on after the learner installs the tool, any build step in Python or Go, a Rust project, Linux and Windows install instructions, and the block firing in a live session.
+
+## 2026-11-12 — Guided installs
+
+- `/learn-build` now writes exact install steps for the learner's computer and helps while they install (D40, second paragraph). The hook's block message and its note for messages during a task point to the same guidance.
+- 246 tests passing; the existing template and hook tests gained assertions for this.
+
+Live check (Sonnet, headless, the Go project on an Apple-silicon Mac without Go):
+- `/learn-build` reported `Darwin arm64` and gave five numbered steps: the download page, the `darwin-arm64.pkg` file, the password prompt and timing, opening a second terminal window, and `go version` with a sample of its output.
+- "which one do i download, theres like 10 files on that page" got the file name and how to find it in both the featured box and the table.
+- A made-up report that the installer succeeded but `go` was not found got an explanation of the PATH, a check of `/usr/local/go/bin` from the session, and one thing to try with what each result would mean. That reply told the learner to quit Terminal with `Cmd+Q`; the rule against this was added afterwards and has not been run live.
+- The task stayed in progress and no project files were written.
+
+Not exercised: a real install through to a passing version check, Linux and Windows, and a tool whose site offers no downloadable installer.
+
+## 2026-11-12 — Install by agent
+
+- `INSTALL.md`, routing lines in `CLAUDE.md` and `prompts/START_HERE.md`, two install options in the README and a `LICENSE` file (D41).
+- 247 tests passing. The README test was replaced by two: both install options are present, and the routing line, `INSTALL.md` and `LICENSE` say what they need to.
+
+Live check (Sonnet, headless, a local copy of the repository standing in for GitHub, scratch folders and a scratch npm prefix):
+- Asked to install only, a fresh agent read `INSTALL.md` and no other repository file, checked Node.js and Git, cloned, ran `setup.sh` by its full path, ran `learnbuild help` and ended by telling the person to run `learnbuild new`. It changed nothing in the clone.
+- The project-creation and hand-over steps were run by hand with the same commands and worked. A first attempt to have the agent run them was not carried out, because it would have written the personal `/learn-new` skill into the owner's real home folder.
+
+Not exercised: the paste-in line against the GitHub address (these changes are not pushed), an agent doing steps 5 and 6, a machine without Node.js or Git, and an interactive session with its permission prompts.
+
+## 2026-11-12 — Package prepared for npm
+
+- `package.json` changed as described in D42.
+- 248 tests passing. One is new and checks the published file list, the `prepack` script and that the package is not marked private.
+
+Checked by hand: `npm pack` produced a 96 kB tarball of 67 files. Installed globally from that tarball into a scratch npm prefix, `learnbuild help` ran, `learnbuild new` created a project with all nine skills, `learnbuild status` read it, and the pre-tool hook blocked `brew install go`. `npm publish --dry-run` completed.
+
+Not done: `npm login` and `npm publish`.

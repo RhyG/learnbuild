@@ -1,5 +1,7 @@
 # LearnBuild repository instructions
 
+**If the person asked you to install, set up or use LearnBuild**, follow `INSTALL.md` and ignore the rest of this file. Everything below is for work on the framework itself.
+
 This repository is implementing **LearnBuild**, a Claude Code-first, learning-first software development framework. Read `README.md`, `docs/PRODUCT.md`, `docs/ARCHITECTURE.md`, `docs/LEARNING.md`, `docs/EXPLAIN.md`, `docs/ACCEPTANCE.md`, and `docs/ROADMAP.md` before major design changes.
 
 ## Mandatory prose standard

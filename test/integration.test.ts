@@ -347,9 +347,45 @@ describe('setup.sh', () => {
     assert.doesNotMatch(old.stdout, /1 of 3/);
   });
 
-  test('the README installs with the script alone', async () => {
-    const readme = await readFile(fileURLToPath(new URL('../../README.md', import.meta.url)), 'utf8');
-    assert.match(readme, /```sh\n\.\/setup\.sh\n```/);
+  const repoFile = (name: string) => readFile(fileURLToPath(new URL(`../../${name}`, import.meta.url)), 'utf8');
+
+  test('the README gives both ways to install: the script and an agent', async () => {
+    const readme = await repoFile('README.md');
+    assert.match(readme, /### Option 1: run the setup script/);
+    assert.match(readme, /git clone https:\/\/github\.com\/RhyG\/learnbuild\.git\ncd learnbuild\n\.\/setup\.sh/);
+    assert.match(readme, /### Option 2: ask Claude Code to do it/);
+    assert.match(readme, /Install LearnBuild from https:\/\/github\.com\/RhyG\/learnbuild by following its INSTALL\.md/);
     assert.doesNotMatch(readme, /npm link/);
+  });
+
+  test('an agent pointed at the repository is sent to INSTALL.md, which installs with the script and hands over', async () => {
+    const claudeMd = await repoFile('CLAUDE.md');
+    assert.ok(claudeMd.indexOf('follow `INSTALL.md` and ignore the rest of this file') < claudeMd.indexOf('## Mandatory prose standard'));
+    const install = await repoFile('INSTALL.md');
+    assert.match(install, /do not change any file in this repository/);
+    assert.match(install, /```sh\n\.\/setup\.sh\n```/);
+    assert.match(install, /learnbuild new --name '<name>' --no-launch/);
+    assert.match(install, /learnbuild open '<full path to the project folder>'/);
+    assert.match(install, /do not install it yourself/);
+    assert.match(await repoFile('LICENSE'), /^MIT License/);
+  });
+});
+
+describe('npm package', () => {
+  test('package.json publishes the built CLI and the files it reads at runtime, and nothing private', async () => {
+    const pkg = JSON.parse(await readFile(fileURLToPath(new URL('../../package.json', import.meta.url)), 'utf8')) as {
+      private?: boolean;
+      files: string[];
+      bin: Record<string, string>;
+      scripts: Record<string, string>;
+      license: string;
+    };
+    assert.equal(pkg.private, undefined);
+    assert.equal(pkg.license, 'MIT');
+    assert.equal(pkg.scripts['prepack'], 'npm run build');
+    const bin = pkg.bin['learnbuild']!;
+    assert.ok(pkg.files.some((entry) => bin.startsWith(`${entry}/`)), 'the command is inside a published folder');
+    for (const needed of ['templates', 'standards', 'LICENSE', 'README.md']) assert.ok(pkg.files.includes(needed), needed);
+    for (const kept of ['test', 'dist', 'docs', 'prompts', 'src']) assert.ok(!pkg.files.includes(kept), `${kept} is not published whole`);
   });
 });

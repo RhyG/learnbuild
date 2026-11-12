@@ -30,6 +30,10 @@ export const STARTER_COMPETENCIES: readonly Competency[] = [
   { id: 'source-control-review', title: 'Source control review', prerequisites: ['git-workflow'] },
   { id: 'ai-generated-code-verification', title: 'Verifying AI-generated code', prerequisites: ['automated-testing'] },
   { id: 'maintenance-and-technical-debt', title: 'Maintenance and technical debt', prerequisites: ['architecture-tradeoffs'] },
+  { id: 'development-toolchain', title: 'Development toolchain', prerequisites: [] },
+  { id: 'command-line-programs', title: 'Command-line programs', prerequisites: [] },
+  { id: 'data-types-and-structures', title: 'Data types and structures', prerequisites: [] },
+  { id: 'files-and-data-formats', title: 'Files and data formats', prerequisites: [] },
 ];
 
 export const COMPETENCY_IDS: ReadonlySet<string> = new Set(STARTER_COMPETENCIES.map((c) => c.id));

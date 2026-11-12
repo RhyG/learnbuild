@@ -1,5 +1,7 @@
 # First Claude Code session — BUILD prompt
 
+This prompt is for developing the framework. To install LearnBuild for someone, follow `INSTALL.md` in the repository root.
+
 You are implementing a new open-source TypeScript framework called **LearnBuild**, described by the documents in this repository.
 
 Your job in this session is to **write working framework code**, not to act as an end-user learner and not merely to produce another high-level plan.

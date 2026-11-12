@@ -39,7 +39,7 @@ const level = (doc: LearnerDocument) => proficiency(doc, 'authentication-vs-auth
 describe('competency catalogue', () => {
   test('prerequisites exist and form no cycles', () => {
     const byId = new Map(STARTER_COMPETENCIES.map((c) => [c.id, c]));
-    assert.equal(byId.size, 25);
+    assert.equal(byId.size, 29);
     const visiting = new Set<string>();
     const done = new Set<string>();
     const visit = (id: string): void => {

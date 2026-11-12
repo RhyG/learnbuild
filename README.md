@@ -27,7 +27,7 @@ LearnBuild has two goals for every project: software that works, and you underst
 | You need | Why | Where to get it |
 |---|---|---|
 | A terminal | It is where you type commands. On a Mac it is the Terminal app; on Windows, use Windows Terminal. | Already on your computer |
-| Node.js, version 22 or newer | LearnBuild runs on it, and so will most projects you build. | https://nodejs.org |
+| Node.js, version 22 or newer | LearnBuild runs on it, and so do the web projects it builds. | https://nodejs.org |
 | Claude Code | The AI assistant LearnBuild works inside. It is a paid product; its setup page explains the options. | https://code.claude.com/docs/en/setup |
 
 Two things are optional and worth having:
@@ -39,15 +39,33 @@ To check Node.js is installed, type `node --version` in your terminal. You shoul
 
 ## Install LearnBuild
 
-LearnBuild is not in the npm package registry yet, so for now you install it from this folder. In your terminal, go to the LearnBuild folder and run:
+LearnBuild is not in the npm package registry yet, so for now it is installed from a copy of this repository. There are two ways to do that.
+
+### Option 1: run the setup script
+
+In your terminal, type these three commands one at a time:
 
 ```sh
+git clone https://github.com/RhyG/learnbuild.git
+cd learnbuild
 ./setup.sh
 ```
 
-The script checks that Node.js is new enough, downloads what LearnBuild depends on, builds it and makes the `learnbuild` command available everywhere on your computer. It takes about a minute and tells you if anything is missing. To check it worked, type `learnbuild help`.
+The first command downloads LearnBuild into a folder called `learnbuild` and needs [Git](https://git-scm.com/downloads). The script then checks that Node.js is new enough, downloads what LearnBuild depends on, builds it and makes the `learnbuild` command available everywhere on your computer. It takes about a minute and tells you if anything is missing. To check it worked, type `learnbuild help`.
 
-Run the same script again whenever you update the LearnBuild folder.
+To update later, run `git pull` in the `learnbuild` folder and then `./setup.sh` again.
+
+### Option 2: ask Claude Code to do it
+
+Open Claude Code in any folder by typing `claude`, then paste this:
+
+```
+Install LearnBuild from https://github.com/RhyG/learnbuild by following its INSTALL.md, then set up my first project.
+```
+
+Claude Code downloads LearnBuild, runs the setup script and creates your first project folder. It asks before running each command, and for your project's name. When it has finished it gives you two things to type, which open your project with LearnBuild running. Your project then already exists, so you do not need to run `learnbuild new` as described in the next section.
+
+The instructions it follows are in [`INSTALL.md`](INSTALL.md).
 
 ## Start your first project
 
@@ -129,6 +147,14 @@ You:        json-file
 LearnBuild: Recorded: games will be saved in a JSON file. Say next to start building it.
 ```
 
+## Projects that are not web pages
+
+You can build other kinds of software, such as a program you run from the terminal or a script that tidies files. LearnBuild picks the language most developers use for that kind of project and tells you why. If you want a particular language, say so when you describe your idea, for example "I want to learn Go".
+
+A language other than the one LearnBuild runs on has to be installed on your computer first. The plan lists what your project needs. The first building step checks for each tool, and if one is missing or too old it stops, explains what the tool is and gives you the install steps from the tool's own website. You run the install yourself in a separate terminal window, then say `next`.
+
+LearnBuild never installs software for your whole computer. It installs only the packages that go inside your project folder.
+
 ## Coming back to a project
 
 Open your terminal, go to the folder where you keep your projects and run:
@@ -178,6 +204,7 @@ The free [Pro Git book](https://git-scm.com/book/en/v2/Getting-Started-About-Ver
 The tool itself enforces each of these.
 
 - **Files change only during a step you started.** Outside a step, the tools that edit files are blocked.
+- **Installing software on your computer is left to you.** Commands that install outside the project folder are blocked, including during a step.
 - **A step starts only when you say so.** Your message has to be a go-ahead such as `next`, or the `/learn-build` command.
 - **A decision is recorded only when you name the option.** The AI cannot pick for you.
 - **A step is complete only with evidence.** Every check needs a saved result from a real run.
@@ -200,10 +227,11 @@ Leave the `.learn-build/` and `.claude/` folders in place. Deleting them removes
 
 | What you see | What to do |
 |---|---|
-| `learnbuild: command not found` | Run the three install commands again from the LearnBuild folder. |
+| `learnbuild: command not found` | Run `./setup.sh` again from the LearnBuild folder and follow what it prints. |
 | `claude: command not found` | Claude Code is not installed. Follow https://code.claude.com/docs/en/setup. |
 | "LearnBuild guard hook cannot run" inside Claude Code | Claude Code cannot find `learnbuild`. Close it, check `learnbuild help` works in your terminal, then start `claude` again. |
 | Claude Code asks permission to run a command | Claude Code asks before it runs commands. Read what it wants to run and approve it if it matches what you asked for. Building a step needs commands such as `npm install`. |
+| LearnBuild stops and asks you to install something | Your project needs a tool that is missing or too old on your computer. Follow the steps it gives in a separate terminal window, then say `next`. If the tool is still not found, close Claude Code and open it again in the project folder. |
 | You are not sure where you are | Type `/learn-progress`, or `/learn-help` for the list of what you can do. |
 | LearnBuild asks you a question before a step and will not continue | It is checking you have understood an idea the next step depends on. Answer in your own words; a wrong answer is fine and gets you another explanation. |
 | "A folder called ... already exists" | Choose a different project name, or run the command from another folder. |

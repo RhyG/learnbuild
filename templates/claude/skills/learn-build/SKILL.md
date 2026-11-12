@@ -35,7 +35,7 @@ The next task has an understanding check.
 3. Carry on as `continue_task`.
 
 ## `continue_task`
-Work on this task only.
+Work on this task only. If it is the first task, or `.learn-build/ARCHITECTURE.md` lists something to install that this task is the first to use, check the tools before writing anything (see "Checking the tools").
 - Build in small steps. After each step, show the learner the important lines and say what they do and why they are there. Skip the routine parts.
 - Before running something, say what you expect to happen, then compare with what did happen.
 - If `learnbuild progress` shows the mode `hands_on`, leave one small, well-defined piece for the learner to write and guide them with hints.
@@ -43,6 +43,47 @@ Work on this task only.
 - Use the tools listed in `.learn-build/ARCHITECTURE.md`. If the step needs one that is not listed, choose it by the rules in step 2 of the learn-plan skill, tell the learner what it is and why you chose it before installing it, and add it to that file.
 - Automated tests arrive in a step of their own (see "The testing step"). Until that step has started, do not write tests or install a testing tool, and check the work with commands. If the learner asks about tests before then, tell them which step covers it.
 - In the steps after the testing step, write tests for what the step adds and show the learner one of them.
+
+### Checking the tools
+
+For each tool under "What needs to be installed" in `.learn-build/ARCHITECTURE.md`, run its version command and compare the result with the version the project needs.
+
+If a tool is missing or too old, stop building and guide the learner through installing it. They run the install themselves, because the project blocks commands that install software outside the project folder, including when the learner asks you to run one. Your part is to make the steps exact and to stay with them until the tool works.
+
+Before writing the instructions, find out what the computer is. Run `uname -sm` for the operating system and the processor type. Check whether a package manager the tool's site recommends is already there, such as `brew --version` on a Mac. These commands only read, so run them yourself and do not ask the learner.
+
+Then give the instructions for this computer only, one tool at a time:
+
+1. Say what the tool is, in a sentence, and why this project needs it.
+2. Choose the way of installing that the tool's own site recommends for this operating system and that has the fewest steps. Prefer a downloaded installer the learner opens and clicks through where the site offers one. Suggest a package manager only if you found it installed.
+3. Write the steps as a numbered list a newcomer can follow without filling any gaps.
+   - Give the full link to the download page and name the file to pick for this operating system and processor.
+   - Put each command in its own code block, complete and ready to copy, and say in a few words what it does.
+   - Say what they will see along the way, such as a request for their computer password or a wait of a few minutes.
+   - If a step uses a terminal, say how to open a second terminal window, since this one is in use.
+4. End the list with the command that proves it worked, such as the version command, and show the kind of line it should print.
+5. Tell them they can ask you anything while they do it, and that if something looks different or fails they should paste what they see. Ask them to say **next** when the install has finished.
+
+While they are installing, stay in the conversation:
+
+- Answer questions about a step in plain words, and explain any message they paste.
+- When something fails, work out why before suggesting a fix. Run commands that only read to look for yourself, such as the version command, `which <tool>`, `echo $PATH` or listing the folder the installer writes to. Then give one fix at a time and ask what happened.
+- If a fix means changing a file outside the project, such as a shell start-up file, give the learner the exact line and where it goes. Do not make that change yourself.
+- Claude Code is running in the learner's terminal application. Never tell them to quit that application or close this window as a fix. If a fresh terminal is needed, have them open a new window.
+- None of this moves the step on or writes to the project.
+
+When they say **next**, run the version command again. If it is not found, the usual cause is that the tool was installed but this session cannot see it yet:
+
+- Look in the place the installer puts it and run it from there by its full path. If that works, the install succeeded.
+- Tell the learner what happened: the terminal keeps a list of folders it searches for commands, called the PATH, and a session that was already open has the old list.
+- Ask them to close Claude Code, open it again in the project folder and say "next". The step carries on from where it stopped.
+- If the tool is still not found after that, help them add its folder to the PATH with the exact line for their shell.
+
+When the version command prints a version that is new enough, tell them it worked and carry on with the step.
+
+Packages that go into the project folder are different, and you install those yourself as part of the step. For Python, create a virtual environment in the project folder and install packages into it, never into the computer's own Python.
+
+Save each version command's output as the evidence for its acceptance criterion.
 
 ### The testing step
 
