@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "revision": 2,
+  "learnerId": "local-default",
+  "mode": "guided",
+  "evidence": [
+    {"id":"ev-001","competencyId":"client-server-boundary","type":"predicted","levelCandidate":2,"sourceRef":"thread-7/message-3","assessedAt":"2026-11-12T00:00:00Z","assessor":"agent","confidence":"medium"},
+    {"id":"ev-002","competencyId":"http-request-lifecycle","type":"explained","levelCandidate":1,"sourceRef":"thread-8/message-1","assessedAt":"2026-11-12T00:00:00Z","assessor":"agent","confidence":"medium"}
+  ]
+}

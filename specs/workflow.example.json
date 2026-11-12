@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "revision": 1,
+  "projectId": "example-football-app",
+  "phaseId": "authentication",
+  "taskId": "auth-01",
+  "status": "waiting_for_decision",
+  "pendingDecisionId": "auth-strategy",
+  "tasks": {
+    "auth-01": {
+      "id": "auth-01",
+      "title": "Choose authentication strategy",
+      "dependencies": [],
+      "checkpointIds": ["auth-strategy-gate"],
+      "acceptanceCriteria": [{ "id": "decision-recorded", "description": "Strategy recorded in DECISIONS.md" }],
+      "status": "active",
+      "verifications": []
+    },
+    "auth-02": {
+      "id": "auth-02",
+      "title": "Implement authentication",
+      "dependencies": ["auth-01"],
+      "checkpointIds": [],
+      "acceptanceCriteria": [{ "id": "login-works", "description": "A valid login creates a session" }],
+      "status": "pending",
+      "verifications": []
+    }
+  },
+  "decisions": {
+    "auth-strategy": {
+      "id": "auth-strategy",
+      "question": "Sessions or token-based authentication?",
+      "options": ["sessions", "tokens"],
+      "status": "pending",
+      "taskId": "auth-01"
+    }
+  },
+  "checkpoints": {
+    "auth-strategy-gate": {
+      "id": "auth-strategy-gate",
+      "type": "decision_gate",
+      "blocking": true,
+      "status": "pending",
+      "decisionId": "auth-strategy"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "revision": 3,
+  "activeThreadId": "thread-token-question",
+  "threads": {
+    "thread-token-question": {
+      "id": "thread-token-question",
+      "parentId": null,
+      "topic": "What is a token?",
+      "status": "active",
+      "pausedWorkflowRevision": 1,
+      "pausedTaskId": "auth-01",
+      "pausedDecisionId": "auth-strategy",
+      "pausedStatus": "waiting_for_decision",
+      "entries": [
+        { "ref": "chat-message-001", "summary": "What is a token?", "at": "2026-11-12T00:00:00Z" },
+        { "ref": "chat-message-002", "summary": "How is that different from a cookie?", "at": "2026-11-12T00:01:00Z" }
+      ],
+      "openedAt": "2026-11-12T00:00:00Z"
+    }
+  }
+}
