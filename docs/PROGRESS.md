@@ -148,3 +148,19 @@ Live checks (Sonnet, headless, only natural replies after `/learn-new`):
 - `learnbuild new` through a pseudo-terminal: banner, name, Git question, editor question, next steps.
 
 Not exercised: the editor actually opening, colour as rendered in a real terminal, and all of the above in an interactive session.
+
+## 2026-11-12 — Prose audit of templates, automatic move into the project folder
+
+- Every skill template, the explain agent and the project `CLAUDE.md` were read against the prose standard and about twenty slips fixed, mostly illustrative lists of three, clipped fragments and one stock metaphor. This was a manual read by the same author, so a second reader may find more.
+- `learnbuild new` and the new `learnbuild open <folder>` leave the terminal inside the project folder (D34). Checked through a pseudo-terminal: after creation, `pwd` in the resulting shell printed the project folder.
+- Owner decisions recorded in D35.
+- 238 tests passing.
+
+### Open items
+1. Run the whole journey in an interactive terminal session: `learnbuild new` launching Claude Code, the editor opening, colour, the shell left in the project folder, and the permission prompts a learner sees.
+2. Add a `LICENSE` file; `package.json` says MIT and the repository has none. Do this before making the repository public.
+3. Publish the package or provide an install script, so setup does not need `npm link`.
+4. Hardened read-only Git diff for `/learn-explain --changed`.
+5. T21: review real skill output against the prose standard.
+6. Try the `hands_on` and `accelerated` modes in a session.
+7. Projects created before 2026-11-12 need `learnbuild install --force` to get the current skills and hooks.

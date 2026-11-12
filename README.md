@@ -65,6 +65,8 @@ LearnBuild then:
 4. Offers to open that folder in your code editor, if you have one.
 5. Opens Claude Code in the folder and starts asking about your idea.
 
+When you close Claude Code, your terminal is left inside the project folder, so you can type `claude` to carry on. Type `exit` to go back to the folder you started in.
+
 From there you are in a conversation. It goes through three stages:
 
 | Stage | What happens | What you do |
@@ -128,12 +130,13 @@ LearnBuild: Recorded: games will be saved in a JSON file. Say next to start buil
 
 ## Coming back to a project
 
-Open your terminal, go to the project folder and start Claude Code:
+Open your terminal, go to the folder where you keep your projects and run:
 
 ```sh
-cd my-project
-claude
+learnbuild open my-project
 ```
+
+This moves into the project folder and starts Claude Code there. If you are already in the project folder, typing `claude` does the same.
 
 Then say `next`, or type `/learn-progress` to see where you are. LearnBuild reads the saved progress, so it does not matter that the earlier conversation is gone.
 
@@ -145,7 +148,7 @@ If you are already in a Claude Code session, type `/learn-new` followed by your 
 /learn-new I want an app to track my running
 ```
 
-LearnBuild creates the project folder and gives you two commands to reopen Claude Code inside it. This works in any folder once you have run `learnbuild new` one time on your computer.
+LearnBuild creates the project folder, then asks you to type `/exit` and run `learnbuild open` with the folder's name. A running Claude Code session cannot move itself into a new folder, so this one step is needed. Starting this way works in any folder once you have run `learnbuild new` one time on your computer.
 
 ## Understanding code that already exists
 
@@ -201,6 +204,7 @@ Leave the `.learn-build/` and `.claude/` folders in place. Deleting them removes
 | "LearnBuild guard hook cannot run" inside Claude Code | Claude Code cannot find `learnbuild`. Close it, check `learnbuild help` works in your terminal, then start `claude` again. |
 | Claude Code asks permission to run a command | Claude Code asks before it runs commands. Read what it wants to run and approve it if it matches what you asked for. Building a step needs commands such as `npm install`. |
 | You are not sure where you are | Type `/learn-progress`, or `/learn-help` for the list of what you can do. |
+| LearnBuild asks you a question before a step and will not continue | It is checking you have understood an idea the next step depends on. Answer in your own words; a wrong answer is fine and gets you another explanation. |
 | "A folder called ... already exists" | Choose a different project name, or run the command from another folder. |
 
 ## Limits worth knowing
@@ -208,7 +212,7 @@ Leave the `.learn-build/` and `.claude/` folders in place. Deleting them removes
 - LearnBuild is at an early version. It has been tested with automated tests and with scripted Claude Code sessions, and less so by people using it day to day.
 - The check that stops shell commands from changing files outside a step works by recognising common patterns. It catches accidental writes, and a command written to hide a write could get past it.
 - `/learn-explain` cannot yet explain what changed between two versions of your code.
-- Understanding checks, where LearnBuild asks you to predict or explain something before continuing, exist but have had little real use.
+- Understanding checks, where LearnBuild asks you to predict or explain something before continuing, cannot be skipped and have had little real use.
 
 ## For people working on LearnBuild itself
 
