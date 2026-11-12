@@ -161,6 +161,16 @@ A language other than the one LearnBuild runs on has to be installed on your com
 
 LearnBuild never installs software for your whole computer. It installs only the packages that go inside your project folder.
 
+### Phone apps and other projects with extra needs
+
+Some ideas need more than a computer and free tools: a Mac for an iPhone app, a large application such as Xcode or Android Studio, a phone to try the app on, or a paid membership to publish in a store. LearnBuild works this out while you describe your idea and tells you before the brief is written, with rough costs and download sizes, so you can go ahead, change the idea or pick another route.
+
+For a phone app it asks a few more questions: which phones the app is for, which computer and phone you have, who needs to install it and which phone features it uses. The answers decide the tools. An iPhone app built on a Mac uses Swift, an Android app uses Kotlin, and an app for both uses React Native with Expo, which also lets you build for an iPhone without a Mac. You install the applications yourself with step-by-step help, and you check what appears on the screen while LearnBuild checks that the app builds and its tests pass.
+
+### What gets checked, and by whom
+
+LearnBuild runs a command for every check it records, such as building the project or running its tests. A command cannot see whether a screen looks right or a button responds. The plan tells you how you will run and use what is built and which parts only you can judge. Each step that changes something you can see ends with exact steps for trying it yourself, and anything you report as wrong is fixed before the step is finished.
+
 ## Coming back to a project
 
 Open your terminal, go to the folder where you keep your projects and run:

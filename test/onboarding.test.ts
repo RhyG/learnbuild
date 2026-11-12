@@ -513,6 +513,13 @@ describe('edit gate (PreToolUse for the main session)', () => {
       'npm install -g typescript',
       'pip install --user requests',
       'cd /tmp && brew install sqlite',
+      'xcode-select --install',
+      'xcodebuild -downloadPlatform iOS',
+      'xcodebuild -runFirstLaunch',
+      'mas install 497799835',
+      'softwareupdate --install --all',
+      'sdkmanager "platforms;android-35"',
+      'avdmanager create avd -n pixel -k "system-images;android-35;google_apis;arm64-v8a"',
     ];
     const local = [
       'npm install express',
@@ -525,6 +532,13 @@ describe('edit gate (PreToolUse for the main session)', () => {
       'brew --version',
       'echo "run: brew install go"',
       'go version',
+      'xcodebuild -version',
+      'xcode-select -p',
+      'xcrun simctl list devices available',
+      'xcodebuild -scheme Notes -destination "platform=iOS Simulator,name=iPhone 16" build',
+      'sdkmanager --list',
+      './gradlew assembleDebug',
+      'ls /Applications/Xcode.app',
     ];
     for (const command of system) {
       assert.equal(looksLikeSystemInstall(command), true, command);
@@ -546,6 +560,7 @@ describe('edit gate (PreToolUse for the main session)', () => {
     const stuck = await promptContext(JSON.stringify({ cwd: repo.paths.root, prompt: 'it says zsh: command not found: go' }));
     assert.match(stuck, /If the learner is installing a tool you asked them to install/);
     assert.match(stuck, /You may run commands that only read/);
+    assert.match(stuck, /If you asked the learner to try what this step built and this message says what happened/);
     assert.equal((await repo.workflow.read()).status, 'executing');
   });
 
@@ -785,6 +800,69 @@ describe('per-message context (UserPromptSubmit)', () => {
     assert.match(build, /Never tell them to quit that application or close this window/);
     assert.match(build, /Look in the place the installer puts it and run it from there by its full path/);
     assert.match(build, /create a virtual environment in the project folder/);
+  });
+
+  test('what an idea needs beyond the computer is found and raised while the brief is written', async () => {
+    const rendered = await renderTemplates();
+    const brief = rendered.get('skills/learn-new/SKILL.md')!;
+    assert.match(brief, /### What the idea needs/);
+    assert.ok(brief.indexOf('### What the idea needs') < brief.indexOf('### Writing the brief'));
+    assert.match(brief, /A particular kind of computer/);
+    assert.match(brief, /A large application that has to be installed/);
+    assert.match(brief, /An account, a key or a payment/);
+    assert.match(brief, /tell the learner now and do not leave it for planning/);
+    assert.match(brief, /ask whether they want to go ahead as described or change something, and wait/);
+    assert.match(brief, /add a "What this project needs" section/);
+    assert.match(brief, /follow Part 1 of the learn-mobile skill/);
+    assert.match(brief, /^allowed-tools: .*Bash\(uname -sm\)/m);
+    const plan = rendered.get('skills/learn-plan/SKILL.md')!;
+    assert.match(plan, /has no "What this project needs" section, the learner has not been told/);
+    assert.match(plan, /leave out any tool that does not run on the learner's computer/);
+    assert.match(plan, /Applications that are installed and used through windows and menus belong on this list too/);
+    const build = rendered.get('skills/learn-build/SKILL.md')!;
+    assert.match(build, /which choices to make on each screen in the order they appear/);
+  });
+
+  test('a phone app gets its own questions, tool choices and build guidance', async () => {
+    const rendered = await renderTemplates();
+    const mobile = rendered.get('skills/learn-mobile/SKILL.md')!;
+    assert.match(mobile, /^user-invocable: false$/m);
+    for (const question of ['Which phones should it run on\?', 'What computer are you building it on\?', 'Which phone do you have to try it on\?', 'Who needs to be able to install it\?', 'Does it use anything only a phone has\?']) {
+      assert.match(mobile, new RegExp(question));
+    }
+    assert.match(mobile, /Xcode does not run on Windows or Linux/);
+    assert.match(mobile, /Ask which they want and wait\. Do not choose for them/);
+    assert.match(mobile, /under a "Phones and equipment" heading/);
+    assert.match(mobile, /\| iPhone only, on a Mac \| Swift with SwiftUI \| Xcode \|/);
+    assert.match(mobile, /\| Android only \| Kotlin with Jetpack Compose \| Android Studio \|/);
+    assert.match(mobile, /\| Both kinds of phone \| React Native with Expo, written in TypeScript \|/);
+    assert.match(mobile, /That look is not an acceptance criterion and must not be recorded as one/);
+    assert.match(mobile, /Xcode has no command that creates an app project, so the learner creates it in Xcode/);
+    assert.match(rendered.get('skills/learn-plan/SKILL.md')!, /follow Part 2 of the learn-mobile skill/);
+    assert.match(rendered.get('skills/learn-build/SKILL.md')!, /follow Part 3 of the learn-mobile skill/);
+    for (const command of ['pod install', 'flutter create notes', 'flutter pub add http']) {
+      assert.equal(looksLikeShellWrite(command), true, command);
+    }
+  });
+
+  test('the learner is told what commands cannot check and tries each step themselves', async () => {
+    const rendered = await renderTemplates();
+    const plan = rendered.get('skills/learn-plan/SKILL.md')!;
+    assert.match(plan, /Take this from the current official documentation of the tools you chose/);
+    assert.match(plan, /say in the notes that it was not checked against the documentation/);
+    assert.match(plan, /a "How you will run and use it" section/);
+    assert.match(plan, /add a "Try it" line saying what the learner will do and what they should see/);
+    assert.match(plan, /\*\*How each step is checked\.\*\*/);
+    assert.match(plan, /the step is not finished until they have/);
+    const build = rendered.get('skills/learn-build/SKILL.md')!;
+    assert.match(build, /### Trying it yourself/);
+    assert.ok(build.indexOf('### Trying it yourself') < build.indexOf('### Committing'));
+    assert.match(build, /Tell the learner what the commands checked and what they cannot see/);
+    assert.match(build, /Ask them to try it and tell you what happened/);
+    assert.match(build, /treat it as a fault in the step/);
+    assert.match(build, /`\.learn-build\/evidence\/<task id>-tried-by-learner\.txt`/);
+    assert.match(build, /Do not attach it to an acceptance criterion/);
+    assert.match(rendered.get('skills/learn-mobile/SKILL.md')!, /follow "Trying it yourself" in the learn-build skill/);
   });
 
   test('tests are left out of setup and introduced in a step of their own', async () => {

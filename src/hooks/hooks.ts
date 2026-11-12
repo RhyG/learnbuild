@@ -26,6 +26,9 @@ const PACKAGE_MANAGER_WRITES = [
   String.raw`\bswift\s+package\s+(?:init|update|resolve)\b`,
   String.raw`\bmix\s+(?:new|deps\.get)\b`,
   String.raw`\bdeno\s+(?:add|remove|init|install)\b`,
+  String.raw`\bpod\s+(?:install|update|init)\b`,
+  String.raw`\b(?:flutter|dart)\s+(?:create|pub)\b`,
+  String.raw`\bgradle\s+init\b`,
 ].join('|');
 
 const WRITING_COMMANDS = new RegExp(
@@ -63,6 +66,13 @@ const SYSTEM_INSTALLS = new RegExp(
     String.raw`\b(?:cargo|go|pipx|gem)\s+install\b`,
     String.raw`\b(?:npm|pnpm|yarn|bun)\s+(?:\S+\s+)*(?:-g|--global|global)(?=\s|$)`,
     String.raw`\bpip3?\s+install\s+(?:\S+\s+)*--user\b`,
+    String.raw`\bxcode-select\s+(?:--install|-s|--switch|-r|--reset)(?=\s|$)`,
+    String.raw`\bxcodebuild\s+(?:\S+\s+)*-(?:downloadPlatform|downloadAllPlatforms|runFirstLaunch|license)\b`,
+    String.raw`\bmas\s+(?:install|upgrade|purchase|get)\b`,
+    String.raw`\bsoftwareupdate\s+(?:\S+\s+)*(?:-i|--install)(?=\s|$)`,
+    String.raw`\bsdkmanager\b(?![^;&|]*--(?:list|version)\b)`,
+    String.raw`\bavdmanager\s+(?:\S+\s+)*(?:create|delete|move)\b`,
+    String.raw`\bflutter\s+(?:upgrade|downgrade|channel)\b`,
   ].join('|'),
 );
 
@@ -281,6 +291,7 @@ export async function preToolDecision(hookInput: string): Promise<HookOutcome> {
           'Guide them through it as "Checking the tools" in the learn-build skill describes: say what the tool is and why the project needs it, ' +
           'then give numbered steps for this computer with the full download link, each command complete in its own code block, what they will see along the way, and the command that proves it worked. ' +
           'Tell them they can ask you anything or paste an error while they do it, and to say "next" when it has finished. ' +
+          'For an application installed through windows and menus, such as Xcode or Android Studio, give the choices to make on each screen in order and say how large the download is. ' +
           'You may run commands that only read, such as version checks, to help. Installing packages into the project folder is not affected.',
       };
     }
@@ -450,6 +461,7 @@ export async function promptContext(hookInput: string): Promise<string> {
       lines.push(
         'Answering a question does not change the task in progress. Carry on with the task only if the learner asks you to continue.',
         'If the learner is installing a tool you asked them to install and has a question, an error or output to show you, help them through it as "Checking the tools" in the learn-build skill describes. You may run commands that only read, such as version checks, to find the cause.',
+        'If you asked the learner to try what this step built and this message says what happened, follow "Trying it yourself" in the learn-build skill: fix what they report as wrong, or save their report and finish the step.',
       );
     } else if (!pending && Object.keys(state.tasks).length === 0 && (await briefIsWritten(root))) {
       lines.push(

@@ -2,7 +2,7 @@
 name: learn-new
 description: Start a new LearnBuild project from an idea. Use when someone wants to begin building something new and learn as they go, or runs /learn-new.
 argument-hint: "[project name or idea]"
-allowed-tools: Bash(learnbuild status), Bash(learnbuild new *), Bash(learnbuild git *), Write, Edit
+allowed-tools: Bash(learnbuild status), Bash(learnbuild new *), Bash(learnbuild git *), Bash(uname -sm), Write, Edit
 ---
 
 # Start a new project
@@ -56,16 +56,33 @@ If it says the brief has not been written yet, find out what they want to build.
 
 Do not ask about programming languages or tools. Those come later, with explanations. If the learner names a language or tool they want to use or learn, record it in `PROJECT.md` under a "Learner's preferences" heading so that planning uses it.
 
+### What the idea needs
+
+Before writing the brief, work out whether the idea needs anything beyond this computer and free tools that install in a few minutes. Check each of these against what the learner described:
+
+- A particular kind of computer. An iPhone or Mac app is built on a Mac, and some Windows software is built on Windows. Run `uname -sm` to see what the learner has.
+- A large application that has to be installed, such as Xcode, Android Studio or a game engine.
+- A device to run it on, such as a phone or a small circuit board.
+- An account, a key or a payment, such as a store membership for publishing an app or a paid service the software would call.
+
+If the learner wants an app on a phone or a tablet, follow Part 1 of the learn-mobile skill now. It has its own questions and covers the points above for phones.
+
+For anything else on the list, tell the learner now and do not leave it for planning. Say what is needed, roughly what it costs in money and time, and whether it is needed for the first version or only later. If there is a way to build the idea without it, such as a web page in place of an app, describe that as well. Then ask whether they want to go ahead as described or change something, and wait for the answer. If what they want cannot be built on the computer they have, say so plainly and give the routes that can.
+
+If the idea needs none of these, say nothing about it and carry on.
+
+### Writing the brief
+
 Then write two files:
 
-- `.learn-build/PROJECT.md`: keep the title line, replace the placeholder text, and add short sections for the idea, who it is for, what the first version does (a few things a user can do), what is left for later, where it runs, and the learner's experience.
+- `.learn-build/PROJECT.md`: keep the title line, replace the placeholder text, and add short sections for the idea, who it is for, what the first version does (a few things a user can do), what is left for later, where it runs, and the learner's experience. If the idea needs anything from the list above, add a "What this project needs" section naming each application, device, account and cost you told the learner about and what they decided.
 - `.learn-build/REQUIREMENTS.md`: a numbered list (R1, R2, …) of what the first version must do, each with a plain "Done when …" line that someone could check by using the software.
 
 Do not create any other files, choose technology, install anything or write code in this step. Write and change these files with the Write and Edit tools; shell commands that write files are blocked until a task is started.
 
 ### Review or move on
 
-Once both files exist, read the summary back in a few lines and tell the learner where the files are. Then give them two ways to continue, naming both words, and stop:
+Once both files exist, read the summary back in a few lines and tell the learner where the files are. If the brief has a "What this project needs" section, list what it holds in the summary so the learner sees it again before planning. Then give them two ways to continue, naming both words, and stop:
 
 - **review** goes through the brief and the requirements with them one part at a time, so they can change anything before planning.
 - **next** moves on to planning, which turns the brief into a short list of building steps.

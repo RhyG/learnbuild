@@ -83,6 +83,8 @@ When the version command prints a version that is new enough, tell them it worke
 
 Packages that go into the project folder are different, and you install those yourself as part of the step. For Python, create a virtual environment in the project folder and install packages into it, never into the computer's own Python.
 
+Some tools are applications the learner installs and uses through windows and menus, such as Xcode or a game engine. Give the same kind of numbered steps for those: where to get the application, which choices to make on each screen in the order they appear, what to do the first time it opens, and the command that shows it is installed. Say before they start how large the download is. For a phone app, follow Part 3 of the learn-mobile skill, which also covers creating the project inside the application and running it on a phone or a simulator.
+
 Save each version command's output as the evidence for its acceptance criterion.
 
 ### The testing step
@@ -99,6 +101,26 @@ A task tagged `automated-testing` in a project that has no tests yet is the step
 Then verify. For every acceptance criterion of the task:
 1. Run a real check: a command whose output shows the criterion is met, or a test once the project has tests.
 2. Save the output: `mkdir -p .learn-build/evidence` and write it to `.learn-build/evidence/<task id>-<criterion id>.txt`.
+
+### Trying it yourself
+
+Commands show only part of the result in most projects. A build that succeeds shows the code fits together, and a passing test shows a rule holds. Neither shows that a screen looks right, that a button responds or that the program is pleasant to use. Whenever the step adds or changes something the learner can see or use, they try it before the step is finished.
+
+Do this after the command checks pass and before committing or recording the result:
+
+1. Tell the learner what the commands checked and what they cannot see. The first time in a project, explain why in a few sentences, using this step as the example. In later steps one line is enough.
+2. Give the exact steps to run it, from "How you will run and use it" in `.learn-build/ARCHITECTURE.md`: each command in its own code block, or where to click, and where the result will appear. If that section is missing, or the steps in it fail, work them out from the tool's official documentation and correct the file.
+3. Say what to do and what they should see, using the "Try it" line for this task in `.learn-build/ROADMAP.md` and the "Done when" lines of the requirements the step covers. Number the things to try. Include one thing that should be refused or handled, such as leaving a field empty, when the step has one.
+4. Ask them to try it and tell you what happened, and to paste or describe anything that looks wrong. Then stop and wait.
+
+When they reply:
+
+- If something did not work or did not look as described, treat it as a fault in the step. Find the cause, fix it, run the command checks again and ask them to try that part again.
+- If they could not get it running, help them as you would with an install: one fix at a time, using commands that only read to look for yourself.
+- If it worked, save what they said in their own words, with the date, to `.learn-build/evidence/<task id>-tried-by-learner.txt`. This file is the record of their look. Do not attach it to an acceptance criterion, which stays tied to a command's output.
+- If they ask to move on without trying it, save that in the same file, and carry on.
+
+A step with nothing for the learner to see or use, such as one that only adds tests, skips this section.
 
 ### Committing
 
@@ -125,7 +147,7 @@ Mark a criterion `pass` only if you ran its check in this session and saw it suc
 
 When the task is verified:
 - Tell the learner what now exists and give the exact command to run or try it themselves.
-- Say what was checked and anything that was not.
+- Say what a command checked, what the learner tried themselves, and anything that neither covered.
 - Show the updated checklist from `learnbuild next`.
 - Stop after this one step, and end by telling them to say **next** when they are ready for the following one.
 

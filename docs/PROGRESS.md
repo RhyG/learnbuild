@@ -258,3 +258,30 @@ Not exercised: the paste-in line against the GitHub address (these changes are n
 Checked by hand: `npm pack` produced a 96 kB tarball of 67 files. Installed globally from that tarball into a scratch npm prefix, `learnbuild help` ran, `learnbuild new` created a project with all nine skills, `learnbuild status` read it, and the pre-tool hook blocked `brew install go`. `npm publish --dry-run` completed.
 
 Not done: `npm login` and `npm publish`.
+
+## 2026-11-12 — Project needs raised early, and phone apps
+
+- `/learn-new` checks what an idea needs beyond the computer and raises it before the brief; `learn-mobile` adds the phone questions, tool choices and build guidance; hook lists extended (D43).
+- 250 tests passing. Two are new: the early check and its routing, and the content of the phone skill. The install-block test gained seven blocked and seven allowed commands.
+
+Live check (Sonnet, headless, Apple-silicon Mac, "an app for my phone that logs my gym workouts"):
+- The agent read the computer with `uname -sm`, then asked which phones, who installs it and which phone features, one at a time. An answer to a different question was accepted and the open question was asked again.
+- Told the app must work with no internet, it explained that Expo Go loads the app from the Mac over Wi-Fi and would not work in the gym, so Xcode is needed to install it properly. It gave a table of what is needed with cost, size and time, mentioned the seven-day limit and the US$99 membership, offered an offline web page as the other route, and waited.
+- `PROJECT.md` got "Phones and equipment" and "What this project needs", including the route that was declined.
+- Planning chose React Native with Expo in TypeScript, listed Xcode with `xcodebuild -version` and Expo Go as confirmed by the learner, and added a last step for installing the app on the phone.
+
+Not exercised: `learnbuild plan apply` was not approved in the headless run (open item 9), so no step was built. Part 3 of the phone skill, an Android or Swift project, a learner without a Mac, and the early check for something other than a phone app have not been run live.
+
+## 2026-11-12 — What commands cannot check
+
+- Run-and-use notes taken from the tools' documentation at planning, a "Try it" line per roadmap task, and a learner try before each step is finished (D44).
+- 251 tests passing; one is new.
+
+Live check (Sonnet, headless, the gym log project, `/learn-plan` run as a command):
+- The plan was applied with five steps. The presentation had "How you will use it" (`npx expo start` in a second terminal window, scan the code, same Wi-Fi) and "How each step is checked", which said that no command can see the screen and that three steps end with the learner trying the app.
+- `ARCHITECTURE.md` got the "How you will run and use it" section, including Developer Mode and trusting the app for the install on the phone, and the roadmap got a "Try it" line for four tasks.
+- The agent did not fetch the documentation and said so in its reply. Web tools were allowed for the run.
+- The first step, which shows the starter app on the phone, was left out of the list of steps the learner tries.
+
+Not exercised: "Trying it yourself" in a building step, including a learner reporting a fault.
+

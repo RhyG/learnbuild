@@ -139,13 +139,14 @@ describe('install', () => {
     '.claude/skills/learn-decide/SKILL.md',
     '.claude/skills/learn-explain/SKILL.md',
     '.claude/skills/learn-help/SKILL.md',
+    '.claude/skills/learn-mobile/SKILL.md',
     '.claude/skills/learn-new/SKILL.md',
     '.claude/skills/learn-plan/SKILL.md',
     '.claude/skills/learn-progress/SKILL.md',
     '.claude/skills/learn-resume/SKILL.md',
     'CLAUDE.md',
   ];
-  const SKILLS = ['learn-ask', 'learn-build', 'learn-decide', 'learn-explain', 'learn-help', 'learn-new', 'learn-plan', 'learn-progress', 'learn-resume'];
+  const SKILLS = ['learn-ask', 'learn-build', 'learn-decide', 'learn-explain', 'learn-help', 'learn-mobile', 'learn-new', 'learn-plan', 'learn-progress', 'learn-resume'];
 
   test('installs skills and agents into a learner project', async () => {
     const root = await tempDir();
@@ -230,7 +231,7 @@ describe('T20 every installed instruction file embeds the full prose standard', 
   test('each rendered skill and agent starts with frontmatter and contains the standard verbatim, once', async () => {
     const standard = loadProseStandard().trimEnd();
     const rendered = await renderTemplates();
-    assert.equal(rendered.size, 10);
+    assert.equal(rendered.size, 11);
     for (const [path, content] of rendered) {
       assert.ok(content.startsWith('---\nname: '), `${path} must start with frontmatter`);
       assert.equal(content.split(standard).length - 1, 1, `${path} must contain the standard exactly once`);
@@ -241,7 +242,7 @@ describe('T20 every installed instruction file embeds the full prose standard', 
   test('templates on disk do not carry their own copy of the rules', async () => {
     const dir = fileURLToPath(new URL('../../templates/', import.meta.url));
     const files = (await readdir(dir, { recursive: true })).filter((f) => f.endsWith('.md'));
-    assert.equal(files.length, 11);
+    assert.equal(files.length, 12);
     for (const file of files) {
       const text = await readFile(join(dir, file), 'utf8');
       assert.ok(!text.includes('Avoid definitional pivots'), file);
@@ -305,7 +306,9 @@ describe('skill templates match the real CLI', () => {
       assert.ok(help.includes(`\`${entry.command}\``), `help skill names ${entry.command}`);
       assert.ok(readme.includes(`\`${entry.command}\``), `README names ${entry.command}`);
     }
+    const rendered = await renderTemplates();
     for (const name of (await readdir(fileURLToPath(new URL('../../templates/claude/skills/', import.meta.url)))).sort()) {
+      if (/^user-invocable: false$/m.test(rendered.get(`skills/${name}/SKILL.md`)!)) continue;
       assert.ok(COMMAND_GUIDE.some((entry) => entry.command.split(' ')[0] === `/${name}`), `guide covers /${name}`);
     }
   });
