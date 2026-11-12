@@ -351,10 +351,11 @@ describe('setup.sh', () => {
 
   test('the README gives both ways to install: the script and an agent', async () => {
     const readme = await repoFile('README.md');
-    assert.match(readme, /### Option 1: run the setup script/);
+    assert.match(readme, /### Option 2: run the setup script/);
     assert.match(readme, /git clone https:\/\/github\.com\/RhyG\/learnbuild\.git\ncd learnbuild\n\.\/setup\.sh/);
-    assert.match(readme, /### Option 2: ask Claude Code to do it/);
+    assert.match(readme, /### Option 1: ask Claude Code to do it/);
     assert.match(readme, /Install LearnBuild from https:\/\/github\.com\/RhyG\/learnbuild by following its INSTALL\.md/);
+    assert.ok(readme.indexOf('### Option 1: ask Claude Code to do it') < readme.indexOf('### Option 2: run the setup script'), 'the agent route comes first');
     assert.doesNotMatch(readme, /npm link/);
   });
 

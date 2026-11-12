@@ -8,8 +8,14 @@ You do not need to have written any code before.
 
 ## Who it is for
 
-- You have an idea for an app or a tool and have never programmed.
-- You already program and want to learn an unfamiliar codebase or a new kind of project.
+LearnBuild is for people who want to learn how software is made by building some with an AI agent.
+
+Agents now write most of the code in a project. What a person needs is the ability to direct an agent and enough understanding to judge what it produces. LearnBuild teaches both as you go: you make the decisions, the agent does the building, and each core idea is explained when your project reaches it, such as where data is kept or how to check that a step works.
+
+- You are new to programming and want to understand software without first learning to write every line yourself.
+- You already program and want practice working with an agent, or want to understand an unfamiliar codebase.
+
+You do not need a big idea to start. Something small that you would use yourself is enough, such as a to-do list or a script that tidies a folder.
 
 ## What makes it different
 
@@ -41,7 +47,19 @@ To check Node.js is installed, type `node --version` in your terminal. You shoul
 
 LearnBuild is not in the npm package registry yet, so for now it is installed from a copy of this repository. There are two ways to do that.
 
-### Option 1: run the setup script
+### Option 1: ask Claude Code to do it
+
+Open Claude Code in any folder by typing `claude`, then paste this:
+
+```
+Install LearnBuild from https://github.com/RhyG/learnbuild by following its INSTALL.md, then set up my first project.
+```
+
+Claude Code downloads LearnBuild, runs the setup script and creates your first project folder. It asks before running each command, and for your project's name. When it has finished it gives you two things to type, which open your project with LearnBuild running. Your project then already exists, so you do not need to run `learnbuild new` as described under "Start your first project" below.
+
+The instructions it follows are in [`INSTALL.md`](INSTALL.md).
+
+### Option 2: run the setup script
 
 In your terminal, type these three commands one at a time:
 
@@ -54,18 +72,6 @@ cd learnbuild
 The first command downloads LearnBuild into a folder called `learnbuild` and needs [Git](https://git-scm.com/downloads). The script then checks that Node.js is new enough, downloads what LearnBuild depends on, builds it and makes the `learnbuild` command available everywhere on your computer. It takes about a minute and tells you if anything is missing. To check it worked, type `learnbuild help`.
 
 To update later, run `git pull` in the `learnbuild` folder and then `./setup.sh` again.
-
-### Option 2: ask Claude Code to do it
-
-Open Claude Code in any folder by typing `claude`, then paste this:
-
-```
-Install LearnBuild from https://github.com/RhyG/learnbuild by following its INSTALL.md, then set up my first project.
-```
-
-Claude Code downloads LearnBuild, runs the setup script and creates your first project folder. It asks before running each command, and for your project's name. When it has finished it gives you two things to type, which open your project with LearnBuild running. Your project then already exists, so you do not need to run `learnbuild new` as described in the next section.
-
-The instructions it follows are in [`INSTALL.md`](INSTALL.md).
 
 ## Start your first project
 
