@@ -17,7 +17,7 @@ export const COMMAND_GUIDE: readonly GuideEntry[] = [
 ];
 
 export const THINGS_TO_SAY: readonly GuideEntry[] = [
-  { command: 'next', what: 'Moves on to the next step. "start", "continue" and "ok" work too.' },
+  { command: 'next', what: 'Moves on to the next step. "start" and "ok" work too.' },
   { command: 'the name of an option', what: 'Makes a choice when you are asked to pick, for example "sqlite".' },
   { command: 'any question', what: 'Gets an answer. Asking never changes your files or moves the project on.' },
 ];

@@ -9,18 +9,17 @@ You do not need to have written any code before.
 ## Who it is for
 
 - You have an idea for an app or a tool and have never programmed.
-- You have tried AI coding tools and ended up with code you could not understand or fix.
 - You already program and want to learn an unfamiliar codebase or a new kind of project.
 
 ## What makes it different
 
-Most AI coding tools aim to finish the job as fast as possible. LearnBuild also aims for you to understand what was built.
+LearnBuild has two goals for every project: software that works, and you understanding how it was built.
 
-- **You can ask anything, at any time.** A question is only ever a question. It never changes your files, makes a choice for you or moves the project on.
+- **You can ask anything, at any time.** Asking a question never changes your files or moves the project on.
 - **You make the choices that matter.** When there is a real fork in the road, such as where your data should be stored, LearnBuild explains the options using your project and waits for you to pick.
 - **Each step is checked before it counts.** A step is marked done only after its checks have been run and the results saved. LearnBuild does not say something works unless it ran it.
 - **Explanations use your project.** New words are explained when they first come up, with your own code as the example.
-- **You can stop and come back.** Your progress is saved in the project folder. Close everything, return next week, and it picks up where you left off.
+- **You can stop and come back.** Your progress is saved in the project folder, so you can close Claude Code and carry on another day.
 - **Your code stays on your computer.** Nothing is uploaded unless you decide to do that yourself.
 
 ## What you need
@@ -71,7 +70,7 @@ From there you are in a conversation. It goes through three stages:
 | Stage | What happens | What you do |
 |---|---|---|
 | 🌱 Your idea | A few plain questions about what you want to build and who it is for. No technical questions. | Answer in your own words |
-| 🧭 The plan | A short list of building steps, the tools chosen for you with the reason for each, and any choices left to you. | Read it, ask about anything, then say `next` |
+| 🧭 The plan | A short list of building steps, the tools chosen for you with the reason for each, and any choices left to you. | Ask about anything, then say `next` |
 | 🔨 Building | One step at a time: LearnBuild writes the code, shows you the important parts, runs the checks and tells you how to try it yourself. | Say `next` for each step |
 
 ### Things you can say
@@ -80,11 +79,11 @@ You do not need to remember commands. These work at any point:
 
 | Say | What happens |
 |---|---|
-| `next` | Moves on to the next step. "start", "continue" and "ok" work too. |
+| `next` | Moves on to the next step. "start" and "ok" work too. |
 | the name of an option | Makes a choice when you are asked to pick, for example "sqlite". |
 | any question | Gets an answer. Asking never changes your files or moves the project on. |
 
-A choice only counts when you reply with the option's exact name. If you say "the simple one", LearnBuild will ask you to confirm by name. This is deliberate, so that a passing remark is never taken as a decision.
+A choice only counts when you reply with the option's exact name. If you say "the simple one", LearnBuild asks you to confirm by name, so that a passing remark is never taken as a decision.
 
 ### Commands
 
@@ -156,23 +155,23 @@ You can also use LearnBuild to learn how an existing project works. In that proj
 learnbuild install
 ```
 
-Then start `claude` and type `/learn-explain` followed by a file, a folder or a topic. It explains what the code does and points to the exact file and line for each claim. In this mode it cannot change, run or install anything.
+Then start `claude` and type `/learn-explain` followed by a file name or a topic. It explains what the code does and points to the exact file and line for each claim. In this mode it can only read files.
 
 ## Git, commits and where your code goes
 
-Git is a tool that saves snapshots of your project, called commits, so you can see what changed and go back if something breaks. LearnBuild asks whether you want it when you create a project, and "no" is a fine answer. You can add it later.
+Git is a tool that saves snapshots of your project, called commits, so you can see what changed and go back if something breaks. LearnBuild asks whether you want it when you create a project, and you can say no and add it later.
 
 If you say yes:
 
 - LearnBuild saves a commit after each step that passes its checks.
 - For the first three commits it stops beforehand, tells you what it is about to do and why, shows the commands, and waits for your go-ahead. The explanations get shorter each time.
-- It never uploads your code, connects to GitHub or any other service, or suggests that you should. If you want to share or back up your code later, ask and it will explain how.
+- It never uploads your code or connects it to GitHub or any other service. If you want to share or back up your code later, ask and it will explain how.
 
-The free [Pro Git book](https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control) is the best place to read more.
+The free [Pro Git book](https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control) explains Git from the beginning.
 
 ## How LearnBuild keeps you in control
 
-These are enforced by the tool, and do not depend on the AI choosing to behave.
+The tool itself enforces each of these.
 
 - **Files change only during a step you started.** Outside a step, the tools that edit files are blocked.
 - **A step starts only when you say so.** Your message has to be a go-ahead such as `next`, or the `/learn-build` command.
@@ -200,14 +199,14 @@ Leave the `.learn-build/` and `.claude/` folders in place. Deleting them removes
 | `learnbuild: command not found` | Run the three install commands again from the LearnBuild folder. |
 | `claude: command not found` | Claude Code is not installed. Follow https://code.claude.com/docs/en/setup. |
 | "LearnBuild guard hook cannot run" inside Claude Code | Claude Code cannot find `learnbuild`. Close it, check `learnbuild help` works in your terminal, then start `claude` again. |
-| Claude Code asks permission to run a command | This is normal. Read what it wants to run and approve it if it matches what you asked for. Building a step needs commands such as `npm install`. |
+| Claude Code asks permission to run a command | Claude Code asks before it runs commands. Read what it wants to run and approve it if it matches what you asked for. Building a step needs commands such as `npm install`. |
 | You are not sure where you are | Type `/learn-progress`, or `/learn-help` for the list of what you can do. |
 | "A folder called ... already exists" | Choose a different project name, or run the command from another folder. |
 
 ## Limits worth knowing
 
 - LearnBuild is at an early version. It has been tested with automated tests and with scripted Claude Code sessions, and less so by people using it day to day.
-- The check that stops shell commands from changing files outside a step works by recognising common patterns. It prevents accidents; it is not a security barrier.
+- The check that stops shell commands from changing files outside a step works by recognising common patterns. It catches accidental writes, and a command written to hide a write could get past it.
 - `/learn-explain` cannot yet explain what changed between two versions of your code.
 - Understanding checks, where LearnBuild asks you to predict or explain something before continuing, exist but have had little real use.
 
@@ -221,5 +220,5 @@ npm test        # build, then run the test suite
 - `src/` holds the TypeScript source. Pure rules are in `src/domain/`, saved state in `src/state/`, the Claude Code hooks in `src/hooks/` and the read-only inspector in `src/explain/`.
 - `templates/` holds the skills, the explain agent and the project `CLAUDE.md` that `learnbuild new` installs.
 - `learnbuild --help` lists every subcommand. All of them except `new` and `help` print JSON.
-- `docs/DECISIONS.md` records each design decision with what was tested. `docs/PROGRESS.md` is the running log. `docs/PRODUCT.md`, `docs/ARCHITECTURE.md` and `docs/ACCEPTANCE.md` are the original specification.
+- `docs/DECISIONS.md` records each design decision with what was tested. `docs/PROGRESS.md` is the running log. The other files in `docs/` are the original specification.
 - `standards/PROSE_STYLE.md` is the writing standard for all text, including what the AI says to learners.

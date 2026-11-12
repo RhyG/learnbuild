@@ -15,7 +15,7 @@ Reply with these three parts.
 
 | Say | What happens |
 |---|---|
-| `next` | Moves on to the next step. "start", "continue" and "ok" work too. |
+| `next` | Moves on to the next step. "start" and "ok" work too. |
 | the name of an option | Makes a choice when you are asked to pick, for example "sqlite". |
 | any question | Gets an answer. Asking never changes your files or moves the project on. |
 
