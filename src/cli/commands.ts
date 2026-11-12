@@ -57,6 +57,7 @@ const USAGE = `Usage: learnbuild <command> [options]
 Start here:
   new [--name <name>] [--dir <parent>] [--git | --no-git] [--no-launch]
                                      create a project folder and open Claude Code
+  open [folder]                      open an existing project in Claude Code and move into its folder
   git --init | --skip                record the learner's choice about Git; --init creates a local repository
 
 Workflow (mutating, revision-checked):

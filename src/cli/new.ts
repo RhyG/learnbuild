@@ -1,5 +1,5 @@
 import { spawn, spawnSync } from 'node:child_process';
-import { mkdir, readdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createInterface, type Interface } from 'node:readline/promises';
@@ -67,6 +67,74 @@ export interface NewIo {
   editors?: () => Editor[];
   /** Replaceable for tests; defaults to launching the editor on the folder. */
   openEditor?: (editor: Editor, folder: string) => void;
+  /** Replaceable for tests; defaults to starting the learner's shell in the folder. */
+  enterShell?: (folder: string) => Promise<void>;
+}
+
+const SHELL_MARKER = 'LEARNBUILD_PROJECT_SHELL';
+
+function startShell(folder: string): Promise<void> {
+  const shell = process.env['SHELL'] ?? (process.platform === 'win32' ? (process.env['ComSpec'] ?? 'cmd.exe') : '/bin/sh');
+  return new Promise((done) => {
+    const child = spawn(shell, [], { cwd: folder, stdio: 'inherit', env: { ...process.env, [SHELL_MARKER]: folder } });
+    child.on('error', () => done());
+    child.on('exit', () => done());
+  });
+}
+
+/**
+ * Leaves the learner inside the project folder. A program cannot change the
+ * directory of the shell that started it, so this starts a new shell there;
+ * typing `exit` returns to the original one. Skipped when there is no
+ * terminal, or when this is already such a shell for the same folder.
+ */
+export async function enterProjectFolder(folder: string, io: NewIo, style: ReturnType<typeof makeStyle>): Promise<void> {
+  if (!io.interactive || process.env[SHELL_MARKER] === folder) return;
+  io.out(`\n${style.bold(`📂 You are now in your project folder: ${folder}`)}`);
+  io.out(style.dim('  Type "claude" to carry on with the project, or "exit" to go back to the folder you started in.\n'));
+  await (io.enterShell ?? startShell)(folder);
+}
+
+function runClaude(folder: string, args: string[]): Promise<number | null> {
+  return new Promise((done) => {
+    const child = spawn('claude', args, { cwd: folder, stdio: 'inherit' });
+    child.on('error', () => done(null));
+    child.on('exit', (code) => done(code ?? 0));
+  });
+}
+
+/**
+ * `learnbuild open [folder]`: opens Claude Code in an existing project and
+ * leaves the learner in its folder afterwards. Returns the process exit code.
+ */
+export async function runOpen(argv: string[], io: NewIo): Promise<number> {
+  const style = makeStyle(io.colour ?? false);
+  const named = argv.find((arg) => !arg.startsWith('-'));
+  const root = await findProjectRoot(resolve(io.cwd, named ?? '.'));
+  if (root === null) {
+    io.out(
+      named === undefined
+        ? 'There is no LearnBuild project in this folder. Name the project folder, for example:  learnbuild open my-project'
+        : `"${named}" is not a LearnBuild project folder. To start a new project, run:  learnbuild new`,
+    );
+    return 1;
+  }
+  if (!hasCommand('claude')) {
+    io.out(`${style.yellow('Claude Code is not installed yet.')} Install it from ${SETUP_URL}.`);
+    await enterProjectFolder(root, io, style);
+    return 0;
+  }
+  if (!io.interactive) {
+    io.out(`To open this project, run:\n    cd "${root}"\n    claude`);
+    return 0;
+  }
+  const brief = await readFile(join(root, '.learn-build', 'PROJECT.md'), 'utf8').catch(() => '');
+  const needsBrief = brief === '' || brief.includes(BRIEF_PLACEHOLDER) || !brief.includes('Version control:');
+  io.out(`\n${style.bold(style.magenta('▶ Opening Claude Code in your project.'))}\n`);
+  const code = await runClaude(root, needsBrief ? ['/learn-new'] : []);
+  if (code === null) io.out('Could not open Claude Code.');
+  await enterProjectFolder(root, io, style);
+  return code ?? 1;
 }
 
 function launchEditor(editor: Editor, folder: string): void {
@@ -178,29 +246,32 @@ async function create(argv: string[], io: NewIo, prompt: Interface | null): Prom
 
   if (!values['no-editor']) await offerEditor(target, io, prompt, style);
 
-  const start = `    cd "${target}"\n    claude "/learn-new"`;
   const tips = style.dim('  Once inside: say "next" to move on, ask anything at any time, and type /learn-help to see every command.');
-  if (!hasCommand('claude')) {
-    io.out(`\n${style.yellow('Claude Code is not installed yet.')} Install it from ${SETUP_URL} and then run:\n${style.cyan(start)}\n${tips}`);
+  const later = `${style.bold('To come back to this project another day, run:')}  ${style.cyan(`learnbuild open ${slug}`)}`;
+  if (prompt === null) {
+    // No terminal to leave the learner in, so say how to get there.
+    const start = `    cd "${target}"\n    claude "/learn-new"`;
+    const lead = hasCommand('claude')
+      ? style.bold('To start, run:')
+      : `${style.yellow('Claude Code is not installed yet.')} Install it from ${SETUP_URL} and then run:`;
+    io.out(`\n${lead}\n${style.cyan(start)}\n${tips}`);
     return 0;
   }
-  if (values['no-launch'] || prompt === null) {
-    io.out(`\n${style.bold('To start, run:')}\n${style.cyan(start)}\n${tips}`);
-    return 0;
-  }
-  io.out(`\n${style.bold(style.magenta('▶ Opening Claude Code in that folder.'))} It will ask about your idea.\n${tips}\n`);
   prompt.close();
-  return new Promise((resolveExit) => {
-    const child = spawn('claude', ['/learn-new'], { cwd: target, stdio: 'inherit' });
-    child.on('error', () => {
-      io.out(`Could not open Claude Code. Run:\n${start}`);
-      resolveExit(1);
-    });
-    child.on('exit', (code) => {
-      io.out(`\n${style.bold('To come back to this project later, run:')}\n${style.cyan(`    cd "${target}"\n    claude`)}`);
-      resolveExit(code ?? 0);
-    });
-  });
+  let exitCode = 0;
+  if (!hasCommand('claude')) {
+    io.out(`\n${style.yellow('Claude Code is not installed yet.')} Install it from ${SETUP_URL}, then type:  ${style.cyan('claude "/learn-new"')}`);
+  } else if (values['no-launch']) {
+    io.out(`\n${style.bold('To start, type:')}  ${style.cyan('claude "/learn-new"')}\n${tips}`);
+  } else {
+    io.out(`\n${style.bold(style.magenta('▶ Opening Claude Code in that folder.'))} It will ask about your idea.\n${tips}\n`);
+    const code = await runClaude(target, ['/learn-new']);
+    if (code === null) io.out(`Could not open Claude Code. Type:  claude "/learn-new"`);
+    exitCode = code ?? 1;
+  }
+  io.out(`\n${later}`);
+  await enterProjectFolder(target, io, style);
+  return exitCode;
 }
 
 /** Suggests opening the folder in a code editor, and opens it if the learner says yes. */

@@ -4,7 +4,7 @@ import type { HookOutcome } from '../explain/guard.js';
 import { preToolDecision, promptContext } from '../hooks/hooks.js';
 import { runCli } from './commands.js';
 import { COMMAND_GUIDE, THINGS_TO_SAY } from './guide.js';
-import { runNew } from './new.js';
+import { runNew, runOpen } from './new.js';
 import { colourWanted, makeStyle } from './style.js';
 
 const args = process.argv.slice(2);
@@ -48,6 +48,14 @@ if (args[0] === 'hook' && args[1] === 'prompt') {
     interactive: process.stdin.isTTY === true && process.stdout.isTTY === true,
     colour: colourWanted(process.stdout),
   });
+} else if (args[0] === 'open') {
+  process.exitCode = await runOpen(args.slice(1), {
+    cwd: process.cwd(),
+    out: (line) => process.stdout.write(`${line}\n`),
+    now: () => new Date().toISOString(),
+    interactive: process.stdin.isTTY === true && process.stdout.isTTY === true,
+    colour: colourWanted(process.stdout),
+  });
 } else if (args.length === 0 || args[0] === 'help') {
   const style = makeStyle(colourWanted(process.stdout));
   const row = (left: string, right: string) => `  ${style.cyan(left.padEnd(32))}${right}`;
@@ -60,7 +68,7 @@ if (args[0] === 'hook' && args[1] === 'prompt') {
       style.bold('  In your terminal'),
       row('learnbuild new', 'Start a new project. Asks for a name, then opens Claude Code.'),
       row('learnbuild help', 'Show this page.'),
-      row('claude', 'Run inside a project folder to carry on where you left off.'),
+      row('learnbuild open <folder>', 'Open a project you made earlier and carry on where you left off.'),
       '',
       style.bold('  Inside Claude Code, you can just say'),
       ...THINGS_TO_SAY.map((entry) => row(entry.command, entry.what)),

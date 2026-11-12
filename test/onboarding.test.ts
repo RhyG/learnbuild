@@ -9,7 +9,7 @@ import { runCli } from '../src/cli/commands.js';
 import { checklist } from '../src/cli/display.js';
 import { GIT_DOCS_URL, VERSION_CONTROL_LABEL, askAboutGit } from '../src/cli/git.js';
 import { COMMAND_GUIDE, THINGS_TO_SAY } from '../src/cli/guide.js';
-import { BRIEF_PLACEHOLDER, runNew, slugify } from '../src/cli/new.js';
+import { BRIEF_PLACEHOLDER, enterProjectFolder, runNew, runOpen, slugify } from '../src/cli/new.js';
 import { renderProjectClaudeMd, renderTemplates } from '../src/install/install.js';
 import { LearnBuildError } from '../src/domain/errors.js';
 import {
@@ -119,6 +119,58 @@ describe('learnbuild new', () => {
     const result = await runCli(['status'], { cwd: join(root, 'src', 'deep'), now: () => AT });
     assert.equal(result.exitCode, 0);
     assert.equal((result.output['workflow'] as { projectId: string }).projectId, 'football-finder');
+  });
+});
+
+describe('ending up inside the project folder', () => {
+  test('with no terminal, new says how to get there and starts no shell', async () => {
+    const parent = await tempDir();
+    const lines: string[] = [];
+    let entered = 0;
+    await runNew(['--name', 'No Terminal', '--no-launch', '--no-editor'], {
+      cwd: parent, out: (l) => lines.push(l), now: () => AT, interactive: false, home: await tempDir(), enterShell: async () => void entered++,
+    });
+    assert.equal(entered, 0);
+    assert.match(lines.join('\n'), /cd ".*no-terminal"/);
+  });
+
+  test('enterProjectFolder starts a shell in the folder once, and not again inside that shell', async () => {
+    const entered: string[] = [];
+    const lines: string[] = [];
+    const io = { cwd: '/', out: (l: string) => lines.push(l), now: () => AT, interactive: true, enterShell: async (f: string) => void entered.push(f) };
+    const plain = { bold: (t: string) => t, dim: (t: string) => t, cyan: (t: string) => t, green: (t: string) => t, yellow: (t: string) => t, magenta: (t: string) => t };
+    await enterProjectFolder('/tmp/project-a', io, plain);
+    assert.deepEqual(entered, ['/tmp/project-a']);
+    assert.match(lines.join('\n'), /You are now in your project folder: \/tmp\/project-a/);
+    assert.match(lines.join('\n'), /"exit" to go back/);
+
+    process.env['LEARNBUILD_PROJECT_SHELL'] = '/tmp/project-a';
+    try {
+      await enterProjectFolder('/tmp/project-a', io, plain);
+      assert.equal(entered.length, 1, 'no nested shell for the same project');
+    } finally {
+      delete process.env['LEARNBUILD_PROJECT_SHELL'];
+    }
+    await enterProjectFolder('/tmp/project-a', { ...io, interactive: false }, plain);
+    assert.equal(entered.length, 1);
+  });
+
+  test('learnbuild open finds the project by folder name or from inside it, and rejects other folders', async () => {
+    const { root } = await newProject('Open Me');
+    const parent = join(root, '..');
+    const run = async (args: string[], cwd: string) => {
+      const lines: string[] = [];
+      const code = await runOpen(args, { cwd, out: (l) => lines.push(l), now: () => AT, interactive: false });
+      return { code, text: lines.join('\n') };
+    };
+    const missing = await run(['nope'], parent);
+    assert.equal(missing.code, 1);
+    assert.match(missing.text, /not a LearnBuild project folder/);
+    assert.equal((await run([], parent)).code, 1);
+    for (const result of [await run(['open-me'], parent), await run([], root), await run([], join(root, '.claude'))]) {
+      assert.equal(result.code, 0);
+      assert.ok(result.text.includes(root) || result.text.includes('Claude Code is not installed'));
+    }
   });
 });
 
@@ -250,12 +302,12 @@ describe('Git is the learner\'s choice', () => {
     assert.ok(newSkill.includes(GIT_DOCS_URL));
     assert.match(newSkill, /Do not suggest GitHub or any other hosting service/);
     const build = rendered.get('skills/learn-build/SKILL.md')!;
-    assert.match(build, /Never push, add a remote or suggest a hosting service unless the learner asks/);
+    assert.match(build, /Never push or add a remote unless the learner asks, and do not bring up hosting services yourself/);
     assert.match(build, /If there is no repository, skip this section and do not create one/);
     assert.match(build, /rather make commits themselves, do not commit/);
     assert.match(build, /first three commits, the project pauses the command/);
     assert.match(build, /If they decline, skip the commit and record the result/);
-    assert.match(await renderProjectClaudeMd(), /never push, add a remote or upload the code anywhere unless the learner asks/);
+    assert.match(await renderProjectClaudeMd(), /never push or add a remote unless the learner asks/);
   });
 });
 
